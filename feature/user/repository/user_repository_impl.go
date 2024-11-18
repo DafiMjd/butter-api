@@ -64,3 +64,9 @@ func (u *UserRepositoryImpl) FindBy(db *gorm.DB, query string, value interface{}
 		return user, err
 	}
 }
+
+func (u *UserRepositoryImpl) ChangePassword(db *gorm.DB, id string, password string) error {
+	err := db.Model(&domain.User{}).Where("id = ?", id).Update("password", password).Error
+
+	return err
+}

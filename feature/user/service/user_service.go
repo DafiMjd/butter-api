@@ -16,4 +16,5 @@ type UserService interface {
 	LoginWithUsername(db *gorm.DB, request web.LoginRequest) web.LoginResponse
 	LoginWithEmail(db *gorm.DB, request web.LoginRequest) web.LoginResponse
 	RefreshToken(user domain.User) web.LoginResponse
+	ChangePassword(db *gorm.DB, request web.ChangePasswordRequest)
 }

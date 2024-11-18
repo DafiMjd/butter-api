@@ -129,7 +129,6 @@ func (u *UserControllerImpl) LoginWithUsername(c *fiber.Ctx) error {
 
 // Update implements UserController.
 func (u *UserControllerImpl) Update(c *fiber.Ctx) error {
-
 	id := c.Params("userId")
 	checkUserId(c, id)
 
@@ -172,6 +171,26 @@ func (u *UserControllerImpl) RefreshToken(c *fiber.Ctx) error {
 		Data: model.SingleDoc{
 			Doc: response,
 		},
+	}
+
+	return c.JSON(webResponse)
+}
+
+func (u *UserControllerImpl) ChangePassword(c *fiber.Ctx) error {
+	id := c.Params("userId")
+	checkUserId(c, id)
+
+	request := web.ChangePasswordRequest{}
+	err := c.BodyParser(&request)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
+	request.ID = id
+
+	u.UserService.ChangePassword(u.DB, request)
+	webResponse := model.WebResponse{
+		Code:   200,
+		Status: "success",
 	}
 
 	return c.JSON(webResponse)

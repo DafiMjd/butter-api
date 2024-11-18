@@ -36,6 +36,7 @@ func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
 	butterGroup.Put("/user/:userId", am.AuthenticateFiber(false), hs.UserController.Update)
 	butterGroup.Delete("/user/:userId", am.AuthenticateFiber(false), hs.UserController.Delete)
 	butterGroup.Post("/refresh-token", am.AuthenticateRefreshToken(), hs.UserController.RefreshToken)
+	butterGroup.Patch("/change-password/:userId", am.AuthenticateFiber(false), hs.UserController.ChangePassword)
 
 	return app
 }

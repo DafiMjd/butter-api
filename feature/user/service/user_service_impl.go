@@ -194,3 +194,33 @@ func (u *UserServiceImpl) RefreshToken(user domain.User) web.LoginResponse {
 		UserResponse: helper.ToUserResponse(user),
 	}
 }
+
+func (u *UserServiceImpl) ChangePassword(db *gorm.DB, request web.ChangePasswordRequest) {
+	user, err := u.UserRepository.FindById(db, request.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	if request.OldPassword == "" {
+		panic(exception.NewBadRequestError("Old Password is required"))
+	}
+	if request.NewPassword == "" {
+		panic(exception.NewBadRequestError("New Password is required"))
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.OldPassword))
+	if err != nil {
+		panic(exception.NewBadRequestError("Old Password is incorrect"))
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.NewPassword))
+	if err == nil {
+		panic(exception.NewBadRequestError("New password must not be the same as old password"))
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), 10)
+	helper.PanicIfError(err)
+
+	err = u.UserRepository.ChangePassword(db, request.ID, string(hash))
+	helper.PanicIfError(err)
+}

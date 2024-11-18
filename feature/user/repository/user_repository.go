@@ -13,4 +13,5 @@ type UserRepository interface {
 	FindById(db *gorm.DB, id string) (domain.User, error)
 	FindAll(db *gorm.DB) ([]domain.User, error)
 	FindBy(db *gorm.DB, query string, value interface{}) (domain.User, error)
+	ChangePassword(db *gorm.DB, id string, password string) error
 }
