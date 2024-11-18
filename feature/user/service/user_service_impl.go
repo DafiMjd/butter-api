@@ -56,10 +56,12 @@ func (u *UserServiceImpl) Create(db *gorm.DB, request web.UserCreateRequest) web
 		helper.PanicIfError(err)
 	}
 
-	token := generateToken(createdUser)
+	token := generateToken(createdUser, TokenExpiredTime)
+	refreshToken := generateToken(createdUser, RefreshTokenExpiredTime)
 
 	return web.LoginResponse{
 		Token:        token,
+		RefreshToken: refreshToken,
 		UserResponse: helper.ToUserResponse(createdUser),
 	}
 }
@@ -159,22 +161,36 @@ func login(repo repository.UserRepository, db *gorm.DB, query string, value stri
 		panic(exception.NewBadRequestError("Password is incorrect"))
 	}
 
-	token := generateToken(user)
+	token := generateToken(user, TokenExpiredTime)
+	refreshToken := generateToken(user, RefreshTokenExpiredTime)
 
 	return web.LoginResponse{
 		Token:        token,
+		RefreshToken: refreshToken,
 		UserResponse: helper.ToUserResponse(user),
 	}
 }
 
-func generateToken(user domain.User) string {
+func generateToken(user domain.User, exp time.Duration) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp": time.Now().Add(exp).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	helper.PanicIfError(err)
 
 	return tokenString
+}
+
+// RefreshToken implements UserService.
+func (u *UserServiceImpl) RefreshToken(user domain.User) web.LoginResponse {
+	token := generateToken(user, TokenExpiredTime)
+	refreshToken := generateToken(user, RefreshTokenExpiredTime)
+
+	return web.LoginResponse{
+		Token:        token,
+		RefreshToken: refreshToken,
+		UserResponse: helper.ToUserResponse(user),
+	}
 }

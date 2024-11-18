@@ -3,8 +3,8 @@ package middleware
 import (
 	"butter/exception"
 	"butter/feature/user/service"
+	"butter/helper"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -26,6 +26,8 @@ func NewAuthMiddleware(userService service.UserService, db *gorm.DB) *AuthMiddle
 }
 
 func (a *AuthMiddleware) AuthenticateFiber(allowedGuest bool) fiber.Handler {
+	checkToken := checkToken
+
 	return func(c *fiber.Ctx) error {
 		var tokenString string
 
@@ -38,43 +40,63 @@ func (a *AuthMiddleware) AuthenticateFiber(allowedGuest bool) fiber.Handler {
 			return c.Next()
 		}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Don't forget to validate the alg is what you expect:
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
+		return checkToken(a, c, tokenString)
+	}
+}
 
-			// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
+func (a *AuthMiddleware) AuthenticateRefreshToken() fiber.Handler {
+	checkToken := checkToken
 
+	return func(c *fiber.Ctx) error {
+
+		payload := struct {
+			RefreshToken string `json:"refreshToken"`
+		}{}
+
+		err := c.BodyParser(&payload)
 		if err != nil {
-			return exception.NewBadRequestError("unauthorized")
+			panic(exception.NewBadRequestError(err.Error()))
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if float64(time.Now().Unix()) > claims["exp"].(float64) {
-				return exception.NewBadRequestError("unauthorized")
-			}
+		return checkToken(a, c, payload.RefreshToken)
+	}
+}
 
-			id, ok := claims["sub"].(string)
-			if !ok {
-				return exception.NewBadRequestError("unauthorized")
-			}
+func checkToken(
+	a *AuthMiddleware,
+	c *fiber.Ctx,
+	t string,
+) error {
+	token, err := helper.ParseJwt(t)
 
-			user := a.UserService.FindById(a.DB, id)
+	if err != nil {
+		return exception.NewBadRequestError(err.Error())
+	}
 
-			if user.Id == "" {
-				return exception.NewBadRequestError("unauthorized")
-			}
+	fmt.Println(t)
 
-			c.Locals("user_id", user.Id)
-			c.Locals("email", user.Email)
-			c.Locals("username", user.Username)
-
-			return c.Next()
-		} else {
-			return exception.NewBadRequestError("unauthorized")
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+			return exception.NewUnauthenticatedError("token expired")
 		}
+
+		id, ok := claims["sub"].(string)
+		if !ok {
+			return exception.NewUnauthenticatedError("unauthorized a")
+		}
+
+		user := a.UserService.FindById(a.DB, id)
+
+		if user.Id == "" {
+			return exception.NewUnauthenticatedError("unauthorized c")
+		}
+
+		c.Locals("user_id", user.Id)
+		c.Locals("email", user.Email)
+		c.Locals("username", user.Username)
+
+		return c.Next()
+	} else {
+		return exception.NewUnauthenticatedError("unauthorized d")
 	}
 }

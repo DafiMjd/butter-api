@@ -10,4 +10,5 @@ type UserController interface {
 	FindAll(c *fiber.Ctx) error
 	LoginWithUsername(c *fiber.Ctx) error
 	LoginWithEmail(c *fiber.Ctx) error
+	RefreshToken(c *fiber.Ctx) error
 }

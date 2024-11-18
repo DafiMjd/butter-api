@@ -2,5 +2,6 @@ package web
 
 type LoginResponse struct {
 	Token        string `json:"token"`
-	UserResponse `json:"user"`
+	RefreshToken string `json:"refreshToken"`
+	UserResponse `json:"user,omitempty"`
 }

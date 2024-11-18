@@ -3,6 +3,7 @@ package controller
 import (
 	"butter/exception"
 	"butter/feature/user/model"
+	"butter/feature/user/model/domain"
 	"butter/feature/user/model/web"
 	"butter/feature/user/service"
 
@@ -154,6 +155,24 @@ func (u *UserControllerImpl) Update(c *fiber.Ctx) error {
 func checkUserId(c *fiber.Ctx, paramUserId string) {
 	loggedInUserId, ok := c.Locals("user_id").(string)
 	if !ok || loggedInUserId != paramUserId {
-		panic(exception.NewBadRequestError("unauthorized"))
+		panic(exception.NewUnauthenticatedError("unauthorized"))
 	}
+}
+
+func (u *UserControllerImpl) RefreshToken(c *fiber.Ctx) error {
+	id, ok := c.Locals("user_id").(string)
+	if !ok {
+		panic(exception.NewUnauthenticatedError("unauthorized"))
+	}
+
+	response := u.UserService.RefreshToken(domain.User{ID: id})
+	webResponse := model.WebResponse{
+		Code:   200,
+		Status: "success",
+		Data: model.SingleDoc{
+			Doc: response,
+		},
+	}
+
+	return c.JSON(webResponse)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"butter/feature/user/model/domain"
 	"butter/feature/user/model/web"
 
 	"gorm.io/gorm"
@@ -14,4 +15,5 @@ type UserService interface {
 	FindAll(db *gorm.DB) []web.UserResponse
 	LoginWithUsername(db *gorm.DB, request web.LoginRequest) web.LoginResponse
 	LoginWithEmail(db *gorm.DB, request web.LoginRequest) web.LoginResponse
+	RefreshToken(user domain.User) web.LoginResponse
 }
