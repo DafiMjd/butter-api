@@ -1,9 +1,9 @@
 package app
 
 import (
-	"butter/exception"
-	"butter/feature/user/controller"
 	"butter/middleware"
+	"butter/pkg/exception"
+	"butter/pkg/user/controller"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"

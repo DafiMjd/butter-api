@@ -30,11 +30,3 @@ CREATE TABLE IF NOT EXISTS butter.posts (
     foreign key (user_id) references users(id)
 ) engine = InnoDB;
 
-CREATE TABLE IF NOT EXISTS butter.user_posts (
-    user_id varchar(40) not null,
-    post_id varchar(40) not null,
-    primary key (user_id, post_id),
-    foreign key (user_id) references users(id),
-    foreign key (post_id) references posts(id)
-) engine = InnoDB;
-

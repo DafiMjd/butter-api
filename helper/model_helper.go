@@ -1,8 +1,8 @@
 package helper
 
 import (
-	"butter/feature/user/model/domain"
-	"butter/feature/user/model/web"
+	"butter/pkg/user/model/domain"
+	"butter/pkg/user/model/web"
 )
 
 func ToUserResponse(user domain.User) web.UserResponse {

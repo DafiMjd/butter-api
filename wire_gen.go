@@ -8,10 +8,10 @@ package main
 
 import (
 	"butter/app"
-	"butter/feature/user/controller"
-	"butter/feature/user/repository"
-	"butter/feature/user/service"
 	"butter/middleware"
+	"butter/pkg/user/controller"
+	"butter/pkg/user/repository"
+	"butter/pkg/user/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/wire"
 )
