@@ -556,6 +556,155 @@
                 }
             }
         },
+        "/unfollow": {
+            "delete": {
+                "tags": [
+                    "Connection"
+                ],
+                "description": "Unfollow other account",
+                "summary": "Unfollow other account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FollowBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success unfollowing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "doc": {
+                                                    "$ref": "#/components/schemas/UserResponse"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/followers": {
+            "get": {
+                "tags": [
+                    "Connection"
+                ],
+                "description": "Get List of Followers",
+                "summary": "Get List of Followers",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "description": "Find followers of userId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success list of user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "docs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/UserResponse"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/followings": {
+            "get": {
+                "tags": [
+                    "Connection"
+                ],
+                "description": "Get List of Followings",
+                "summary": "Get List of Followings",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "description": "Find followings of userId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success list of user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "docs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/UserResponse"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/posts": {
             "get": {
                 "tags": [
@@ -903,7 +1052,7 @@
             "FollowBody": {
                 "type": "object",
                 "properties": {
-                    "userId": {
+                    "followeeId": {
                         "type": "string"
                     }
                 }

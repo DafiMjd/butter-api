@@ -2,6 +2,7 @@ package app
 
 import (
 	"butter/middleware"
+	"butter/pkg/connection"
 	"butter/pkg/exception"
 	"butter/pkg/post"
 	"butter/pkg/user"
@@ -11,8 +12,9 @@ import (
 )
 
 type FiberHandlerSet struct {
-	UserController user.UserController
-	PostController post.PostController
+	user.UserController
+	post.PostController
+	connection.ConnectionController
 }
 
 func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
@@ -45,6 +47,11 @@ func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
 	butterGroup.Get("/post/:postId", am.AuthenticateFiber(true), hs.PostController.FindById)
 	butterGroup.Patch("/post/:postId", am.AuthenticateFiber(false), hs.PostController.Update)
 	butterGroup.Delete("/post/:postId", am.AuthenticateFiber(false), hs.PostController.Delete)
+
+	butterGroup.Post("/follow", am.AuthenticateFiber(false), hs.ConnectionController.Follow)
+	butterGroup.Delete("/unfollow", am.AuthenticateFiber(false), hs.ConnectionController.Unfollow)
+	butterGroup.Get("/followers", am.AuthenticateFiber(true), hs.ConnectionController.FindAllFollowers)
+	butterGroup.Get("/followings", am.AuthenticateFiber(true), hs.ConnectionController.FindAllFollowings)
 
 	return app
 }

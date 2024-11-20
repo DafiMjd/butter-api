@@ -6,6 +6,7 @@ package main
 import (
 	"butter/app"
 	"butter/middleware"
+	"butter/pkg/connection"
 	"butter/pkg/post"
 	"butter/pkg/user"
 
@@ -20,6 +21,7 @@ func InitializedServer() *fiber.App {
 		ProvideUser,
 		ProvidePost,
 		ProvideFiber,
+		ProvideConnection,
 	)
 	return nil
 }
@@ -39,4 +41,10 @@ var ProvidePost = wire.NewSet(
 	wire.Struct(new(post.PostRepository), "*"),
 	wire.Struct(new(post.PostController), "*"),
 	wire.Struct(new(post.PostService), "*"),
+)
+
+var ProvideConnection = wire.NewSet(
+	wire.Struct(new(connection.ConnectionRepository), "*"),
+	wire.Struct(new(connection.ConnectionController), "*"),
+	wire.Struct(new(connection.ConnectionService), "*"),
 )
