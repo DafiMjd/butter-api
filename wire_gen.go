@@ -9,9 +9,8 @@ package main
 import (
 	"butter/app"
 	"butter/middleware"
-	"butter/pkg/user/controller"
-	"butter/pkg/user/repository"
-	"butter/pkg/user/service"
+	"butter/pkg/post"
+	"butter/pkg/user"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/wire"
 )
@@ -19,12 +18,29 @@ import (
 // Injectors from injector.go:
 
 func InitializedServer() *fiber.App {
-	userRepository := repository.NewUserRepositoryImpl()
-	userService := service.NewUserServiceImpl(userRepository)
 	db := app.NewDb()
-	userController := controller.NewUserControllerImpl(userService, db)
+	userRepository := user.UserRepository{
+		DB: db,
+	}
+	userService := user.UserService{
+		UserRepository: userRepository,
+	}
+	userController := user.UserController{
+		UserService: userService,
+	}
+	postRepository := post.PostRepository{
+		DB: db,
+	}
+	postService := post.PostService{
+		PostRepository: postRepository,
+		UserRepository: userRepository,
+	}
+	postController := post.PostController{
+		PostService: postService,
+	}
 	fiberHandlerSet := app.FiberHandlerSet{
 		UserController: userController,
+		PostController: postController,
 	}
 	authMiddleware := middleware.NewAuthMiddleware(userService, db)
 	fiberApp := app.NewFiber(fiberHandlerSet, authMiddleware)
@@ -34,3 +50,7 @@ func InitializedServer() *fiber.App {
 // injector.go:
 
 var ProvideFiber = wire.NewSet(app.NewFiber, wire.Struct(new(app.FiberHandlerSet), "*"))
+
+var ProvideUser = wire.NewSet(wire.Struct(new(user.UserRepository), "*"), wire.Struct(new(user.UserController), "*"), wire.Struct(new(user.UserService), "*"))
+
+var ProvidePost = wire.NewSet(wire.Struct(new(post.PostRepository), "*"), wire.Struct(new(post.PostController), "*"), wire.Struct(new(post.PostService), "*"))

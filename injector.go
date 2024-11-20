@@ -6,9 +6,8 @@ package main
 import (
 	"butter/app"
 	"butter/middleware"
-	"butter/pkg/user/controller"
-	"butter/pkg/user/repository"
-	"butter/pkg/user/service"
+	"butter/pkg/post"
+	"butter/pkg/user"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/wire"
@@ -17,10 +16,9 @@ import (
 func InitializedServer() *fiber.App {
 	wire.Build(
 		app.NewDb,
-		repository.NewUserRepositoryImpl,
-		service.NewUserServiceImpl,
-		controller.NewUserControllerImpl,
 		middleware.NewAuthMiddleware,
+		ProvideUser,
+		ProvidePost,
 		ProvideFiber,
 	)
 	return nil
@@ -29,4 +27,16 @@ func InitializedServer() *fiber.App {
 var ProvideFiber = wire.NewSet(
 	app.NewFiber,
 	wire.Struct(new(app.FiberHandlerSet), "*"),
+)
+
+var ProvideUser = wire.NewSet(
+	wire.Struct(new(user.UserRepository), "*"),
+	wire.Struct(new(user.UserController), "*"),
+	wire.Struct(new(user.UserService), "*"),
+)
+
+var ProvidePost = wire.NewSet(
+	wire.Struct(new(post.PostRepository), "*"),
+	wire.Struct(new(post.PostController), "*"),
+	wire.Struct(new(post.PostService), "*"),
 )

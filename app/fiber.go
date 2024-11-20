@@ -3,14 +3,16 @@ package app
 import (
 	"butter/middleware"
 	"butter/pkg/exception"
-	"butter/pkg/user/controller"
+	"butter/pkg/post"
+	"butter/pkg/user"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 type FiberHandlerSet struct {
-	UserController controller.UserController
+	UserController user.UserController
+	PostController post.PostController
 }
 
 func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
@@ -37,6 +39,12 @@ func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
 	butterGroup.Delete("/user/:userId", am.AuthenticateFiber(false), hs.UserController.Delete)
 	butterGroup.Post("/refresh-token", am.AuthenticateRefreshToken(), hs.UserController.RefreshToken)
 	butterGroup.Patch("/change-password/:userId", am.AuthenticateFiber(false), hs.UserController.ChangePassword)
+
+	butterGroup.Post("/post", am.AuthenticateFiber(false), hs.PostController.Create)
+	butterGroup.Get("/posts", am.AuthenticateFiber(true), hs.PostController.FindAll)
+	butterGroup.Get("/post/:postId", am.AuthenticateFiber(true), hs.PostController.FindById)
+	butterGroup.Patch("/post/:postId", am.AuthenticateFiber(false), hs.PostController.Update)
+	butterGroup.Delete("/post/:postId", am.AuthenticateFiber(false), hs.PostController.Delete)
 
 	return app
 }

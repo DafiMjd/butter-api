@@ -1,6 +1,6 @@
 package web
 
-type UserCreateRequest struct {
+type PostCreateRequest struct {
 	UserId  string `json:"userId"`
 	Content string `json:"content"`
 }

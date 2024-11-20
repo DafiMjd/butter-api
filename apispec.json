@@ -561,6 +561,16 @@
                 "tags": [
                     "Post"
                 ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Find by username",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "description": "Get List of Post",
                 "summary": "Get List of Post",
                 "responses": {
@@ -693,6 +703,17 @@
                 ],
                 "description": "Edit Post",
                 "summary": "Edit Post",
+                "parameters": [
+                    {
+                        "name": "postId",
+                        "in": "path",
+                        "description": "Post Id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {

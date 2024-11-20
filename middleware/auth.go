@@ -3,8 +3,7 @@ package middleware
 import (
 	"butter/helper"
 	"butter/pkg/exception"
-	"butter/pkg/user/service"
-	"fmt"
+	"butter/pkg/user"
 	"strings"
 	"time"
 
@@ -14,11 +13,11 @@ import (
 )
 
 type AuthMiddleware struct {
-	UserService service.UserService
+	UserService user.UserService
 	DB          *gorm.DB
 }
 
-func NewAuthMiddleware(userService service.UserService, db *gorm.DB) *AuthMiddleware {
+func NewAuthMiddleware(userService user.UserService, db *gorm.DB) *AuthMiddleware {
 	return &AuthMiddleware{
 		UserService: userService,
 		DB:          db,
@@ -73,8 +72,6 @@ func checkToken(
 		return exception.NewBadRequestError(err.Error())
 	}
 
-	fmt.Println(t)
-
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
 			return exception.NewUnauthenticatedError("token expired")
@@ -85,7 +82,7 @@ func checkToken(
 			return exception.NewUnauthenticatedError("unauthorized a")
 		}
 
-		user := a.UserService.FindById(a.DB, id)
+		user := a.UserService.FindById(id)
 
 		if user.Id == "" {
 			return exception.NewUnauthenticatedError("unauthorized c")
