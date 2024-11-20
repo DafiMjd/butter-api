@@ -55,9 +55,9 @@ func (p *PostController) Delete(c *fiber.Ctx) error {
 }
 
 func (p *PostController) FindAll(c *fiber.Ctx) error {
-	username := c.Query("userId")
+	userId := c.Query("userId")
 
-	posts := p.PostService.FindAll(username)
+	posts := p.PostService.FindAll(userId)
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
