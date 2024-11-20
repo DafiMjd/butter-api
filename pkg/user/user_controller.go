@@ -1,9 +1,9 @@
 package user
 
 import (
-	"butter/model"
 	"butter/pkg/exception"
-	"butter/pkg/user/model/web"
+	"butter/pkg/model"
+	"butter/pkg/model/usermodel"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +20,7 @@ func NewUserController(userService UserService) *UserController {
 
 // Create implements UserController.
 func (u *UserController) Create(c *fiber.Ctx) error {
-	userCreateRequest := web.UserCreateRequest{}
+	userCreateRequest := usermodel.UserCreateRequest{}
 	err := c.BodyParser(&userCreateRequest)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -84,7 +84,7 @@ func (u *UserController) FindById(c *fiber.Ctx) error {
 
 // LoginWithEmail implements UserController.
 func (u *UserController) LoginWithEmail(c *fiber.Ctx) error {
-	loginRequest := web.LoginRequest{}
+	loginRequest := usermodel.LoginRequest{}
 	err := c.BodyParser(&loginRequest)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -104,7 +104,7 @@ func (u *UserController) LoginWithEmail(c *fiber.Ctx) error {
 
 // LoginWithUsername implements UserController.
 func (u *UserController) LoginWithUsername(c *fiber.Ctx) error {
-	loginRequest := web.LoginRequest{}
+	loginRequest := usermodel.LoginRequest{}
 	err := c.BodyParser(&loginRequest)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -127,7 +127,7 @@ func (u *UserController) Update(c *fiber.Ctx) error {
 	id := c.Params("userId")
 	checkUserId(c, id)
 
-	request := web.UserUpdateRequest{}
+	request := usermodel.UserUpdateRequest{}
 	err := c.BodyParser(&request)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -159,7 +159,7 @@ func (u *UserController) RefreshToken(c *fiber.Ctx) error {
 		panic(exception.NewUnauthenticatedError("unauthorized"))
 	}
 
-	response := u.UserService.RefreshToken(UserEntity{ID: id})
+	response := u.UserService.RefreshToken(usermodel.UserEntity{ID: id})
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
@@ -175,7 +175,7 @@ func (u *UserController) ChangePassword(c *fiber.Ctx) error {
 	id := c.Params("userId")
 	checkUserId(c, id)
 
-	request := web.ChangePasswordRequest{}
+	request := usermodel.ChangePasswordRequest{}
 	err := c.BodyParser(&request)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))

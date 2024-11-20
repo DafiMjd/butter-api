@@ -1,4 +1,4 @@
-package web
+package usermodel
 
 type LoginRequest struct {
 	Username string `json:"username" validate:"max=50,min=1"`

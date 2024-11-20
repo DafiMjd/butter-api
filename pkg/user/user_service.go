@@ -3,7 +3,7 @@ package user
 import (
 	"butter/helper"
 	"butter/pkg/exception"
-	"butter/pkg/user/model/web"
+	"butter/pkg/model/usermodel"
 	"os"
 	"time"
 
@@ -26,14 +26,14 @@ func NewUserService(userRepository UserRepository) *UserService {
 }
 
 // Create implements UserService.
-func (u *UserService) Create(request web.UserCreateRequest) web.LoginResponse {
+func (u *UserService) Create(request usermodel.UserCreateRequest) usermodel.LoginResponse {
 	// err := u.Validate.Struct(request)
 	// helper.PanicIfError(err)
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(request.Password), 10)
 	helper.PanicIfError(err)
 
-	newUser := UserEntity{
+	newUser := usermodel.UserEntity{
 		ID:        uuid.New().String(),
 		Username:  request.Username,
 		Password:  string(hash),
@@ -56,10 +56,10 @@ func (u *UserService) Create(request web.UserCreateRequest) web.LoginResponse {
 	token := generateToken(createdUser, TokenExpiredTime)
 	refreshToken := generateToken(createdUser, RefreshTokenExpiredTime)
 
-	return web.LoginResponse{
+	return usermodel.LoginResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		UserResponse: ToUserResponse(createdUser),
+		UserResponse: usermodel.ToUserResponse(createdUser),
 	}
 }
 
@@ -75,24 +75,24 @@ func (u *UserService) Delete(id string) {
 }
 
 // FindAll implements UserService.
-func (u *UserService) FindAll() []web.UserResponse {
+func (u *UserService) FindAll() []usermodel.UserResponse {
 	users, err := u.UserRepository.FindAll()
 	helper.PanicIfError(err)
 
-	return ToUserResponses(users)
+	return usermodel.ToUserResponses(users)
 }
 
 // FindById implements UserService.
-func (u *UserService) FindById(id string) web.UserResponse {
+func (u *UserService) FindById(id string) usermodel.UserResponse {
 	user, err := u.UserRepository.FindById(id)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	return ToUserResponse(user)
+	return usermodel.ToUserResponse(user)
 }
 
-func (u *UserService) Update(request web.UserUpdateRequest) web.UserResponse {
+func (u *UserService) Update(request usermodel.UserUpdateRequest) usermodel.UserResponse {
 	// err := u.Validate.Struct(request)
 	// helper.PanicIfError(err)
 
@@ -105,7 +105,7 @@ func (u *UserService) Update(request web.UserUpdateRequest) web.UserResponse {
 	user.Name = request.Name
 	user.Birthdate = request.Birthdate
 
-	var updatedUser = UserEntity{}
+	var updatedUser = usermodel.UserEntity{}
 
 	updatedUser, err = u.UserRepository.Update(user)
 	me, ok := err.(*mysql.MySQLError)
@@ -118,10 +118,10 @@ func (u *UserService) Update(request web.UserUpdateRequest) web.UserResponse {
 		helper.PanicIfError(err)
 	}
 
-	return ToUserResponse(updatedUser)
+	return usermodel.ToUserResponse(updatedUser)
 }
 
-func (u *UserService) LoginWithUsername(request web.LoginRequest) web.LoginResponse {
+func (u *UserService) LoginWithUsername(request usermodel.LoginRequest) usermodel.LoginResponse {
 	// err := u.Validate.Struct(request)
 	// helper.PanicIfError(err)
 
@@ -132,7 +132,7 @@ func (u *UserService) LoginWithUsername(request web.LoginRequest) web.LoginRespo
 	return login(u.UserRepository, "username = ?", request.Username, request.Password)
 }
 
-func (u *UserService) LoginWithEmail(request web.LoginRequest) web.LoginResponse {
+func (u *UserService) LoginWithEmail(request usermodel.LoginRequest) usermodel.LoginResponse {
 	// err := u.Validate.Struct(request)
 	// helper.PanicIfError(err)
 
@@ -143,7 +143,7 @@ func (u *UserService) LoginWithEmail(request web.LoginRequest) web.LoginResponse
 	return login(u.UserRepository, "email = ?", request.Email, request.Password)
 }
 
-func login(repo UserRepository, query string, value string, password string) web.LoginResponse {
+func login(repo UserRepository, query string, value string, password string) usermodel.LoginResponse {
 	if password == "" {
 		panic(exception.NewBadRequestError("Password is required"))
 	}
@@ -161,14 +161,14 @@ func login(repo UserRepository, query string, value string, password string) web
 	token := generateToken(user, TokenExpiredTime)
 	refreshToken := generateToken(user, RefreshTokenExpiredTime)
 
-	return web.LoginResponse{
+	return usermodel.LoginResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		UserResponse: ToUserResponse(user),
+		UserResponse: usermodel.ToUserResponse(user),
 	}
 }
 
-func generateToken(user UserEntity, exp time.Duration) string {
+func generateToken(user usermodel.UserEntity, exp time.Duration) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(exp).Unix(),
@@ -181,18 +181,18 @@ func generateToken(user UserEntity, exp time.Duration) string {
 }
 
 // RefreshToken implements UserService.
-func (u *UserService) RefreshToken(user UserEntity) web.LoginResponse {
+func (u *UserService) RefreshToken(user usermodel.UserEntity) usermodel.LoginResponse {
 	token := generateToken(user, TokenExpiredTime)
 	refreshToken := generateToken(user, RefreshTokenExpiredTime)
 
-	return web.LoginResponse{
+	return usermodel.LoginResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		UserResponse: ToUserResponse(user),
+		UserResponse: usermodel.ToUserResponse(user),
 	}
 }
 
-func (u *UserService) ChangePassword(request web.ChangePasswordRequest) {
+func (u *UserService) ChangePassword(request usermodel.ChangePasswordRequest) {
 	user, err := u.UserRepository.FindById(request.ID)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))

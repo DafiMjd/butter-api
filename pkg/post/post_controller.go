@@ -1,9 +1,9 @@
 package post
 
 import (
-	"butter/model"
 	"butter/pkg/exception"
-	"butter/pkg/post/model/web"
+	"butter/pkg/model"
+	"butter/pkg/model/postmodel"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,7 +19,7 @@ func NewPostController(postService PostService) *PostController {
 }
 
 func (p *PostController) Create(c *fiber.Ctx) error {
-	postCreateRequest := web.PostCreateRequest{}
+	postCreateRequest := postmodel.PostCreateRequest{}
 	err := c.BodyParser(&postCreateRequest)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -87,7 +87,7 @@ func (p *PostController) FindById(c *fiber.Ctx) error {
 func (p *PostController) Update(c *fiber.Ctx) error {
 	id := c.Params("postId")
 
-	request := web.PostUpdateRequest{}
+	request := postmodel.PostUpdateRequest{}
 	err := c.BodyParser(&request)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))

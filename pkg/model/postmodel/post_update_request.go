@@ -1,4 +1,4 @@
-package web
+package postmodel
 
 type PostUpdateRequest struct {
 	ID      string `json:"id"`

@@ -1,4 +1,4 @@
-package web
+package usermodel
 
 type ChangePasswordRequest struct {
 	ID          string `json:"id"`

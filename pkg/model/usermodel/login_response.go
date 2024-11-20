@@ -1,4 +1,4 @@
-package web
+package usermodel
 
 type LoginResponse struct {
 	Token        string `json:"token"`

@@ -1,7 +1,7 @@
 package exception
 
 import (
-	"butter/model"
+	"butter/pkg/model"
 	"errors"
 	"net/http"
 

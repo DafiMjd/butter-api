@@ -1,6 +1,7 @@
 package user
 
 import (
+	"butter/pkg/model/usermodel"
 	"errors"
 
 	"gorm.io/gorm"
@@ -16,31 +17,27 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	}
 }
 
-// Create implements UserRepository.
-func (u *UserRepository) Create(user UserEntity) (UserEntity, error) {
+func (u *UserRepository) Create(user usermodel.UserEntity) (usermodel.UserEntity, error) {
 	err := u.DB.Create(&user).Error
 
 	return user, err
 }
 
-// Delete implements UserRepository.
-func (u *UserRepository) Delete(user UserEntity) error {
+func (u *UserRepository) Delete(user usermodel.UserEntity) error {
 	err := u.DB.Delete(&user).Error
 
 	return err
 }
 
-// FindAll implements UserRepository.
-func (u *UserRepository) FindAll() ([]UserEntity, error) {
-	var users []UserEntity
+func (u *UserRepository) FindAll() ([]usermodel.UserEntity, error) {
+	var users []usermodel.UserEntity
 	err := u.DB.Order("name asc").Find(&users).Error
 
 	return users, err
 }
 
-// FindById implements UserRepository.
-func (u *UserRepository) FindById(id string) (UserEntity, error) {
-	var user UserEntity
+func (u *UserRepository) FindById(id string) (usermodel.UserEntity, error) {
+	var user usermodel.UserEntity
 	err := u.DB.Take(&user, "id = ?", id).Error
 
 	if user.ID == "" {
@@ -50,15 +47,14 @@ func (u *UserRepository) FindById(id string) (UserEntity, error) {
 	}
 }
 
-// Update implements UserRepository.
-func (u *UserRepository) Update(user UserEntity) (UserEntity, error) {
+func (u *UserRepository) Update(user usermodel.UserEntity) (usermodel.UserEntity, error) {
 	err := u.DB.Save(&user).Error
 
 	return user, err
 }
 
-func (u *UserRepository) FindBy(query string, value interface{}) (UserEntity, error) {
-	var user UserEntity
+func (u *UserRepository) FindBy(query string, value interface{}) (usermodel.UserEntity, error) {
+	var user usermodel.UserEntity
 	err := u.DB.Take(&user, query, value).Error
 
 	if user.ID == "" {
@@ -69,7 +65,14 @@ func (u *UserRepository) FindBy(query string, value interface{}) (UserEntity, er
 }
 
 func (u *UserRepository) ChangePassword(id string, password string) error {
-	err := u.DB.Model(&UserEntity{}).Where("id = ?", id).Update("password", password).Error
+	err := u.DB.Model(&usermodel.UserEntity{}).Where("id = ?", id).Update("password", password).Error
 
 	return err
+}
+
+func (u *UserRepository) FindAllByIds(ids []string) ([]usermodel.UserEntity, error) {
+	var users []usermodel.UserEntity
+	err := u.DB.Where("id IN ?", ids).Order("name asc").Find(&users).Error
+
+	return users, err
 }

@@ -1,4 +1,4 @@
-package web
+package usermodel
 
 import (
 	"butter/pkg/ctype"

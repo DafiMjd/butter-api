@@ -3,7 +3,7 @@ package post
 import (
 	"butter/helper"
 	"butter/pkg/exception"
-	"butter/pkg/post/model/web"
+	"butter/pkg/model/postmodel"
 	"butter/pkg/user"
 
 	"github.com/google/uuid"
@@ -24,12 +24,12 @@ func NewPostService(
 	}
 }
 
-func (p *PostService) Create(request web.PostCreateRequest) web.PostResponse {
+func (p *PostService) Create(request postmodel.PostCreateRequest) postmodel.PostResponse {
 	user, err := p.UserRepository.FindById(request.UserId)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
-	post := PostEntity{
+	post := postmodel.PostEntity{
 		ID:      uuid.New().String(),
 		UserId:  request.UserId,
 		Content: request.Content,
@@ -38,7 +38,7 @@ func (p *PostService) Create(request web.PostCreateRequest) web.PostResponse {
 	createdPost, err := p.PostRepository.Create(post)
 	helper.PanicIfError(err)
 
-	return ToPostResponse(createdPost)
+	return postmodel.ToPostResponse(createdPost)
 }
 
 func (p *PostService) Delete(id string, loggedInUserId string) {
@@ -55,8 +55,8 @@ func (p *PostService) Delete(id string, loggedInUserId string) {
 	helper.PanicIfError(err)
 }
 
-func (p *PostService) FindAll(userId string) []web.PostResponse {
-	var posts []PostEntity
+func (p *PostService) FindAll(userId string) []postmodel.PostResponse {
+	var posts []postmodel.PostEntity
 	var err error
 	if userId == "" {
 		posts, err = p.PostRepository.FindAll()
@@ -65,20 +65,20 @@ func (p *PostService) FindAll(userId string) []web.PostResponse {
 	}
 	helper.PanicIfError(err)
 
-	return ToPostResponses(posts)
+	return postmodel.ToPostResponses(posts)
 }
 
-func (p *PostService) FindById(id string) web.PostResponse {
+func (p *PostService) FindById(id string) postmodel.PostResponse {
 	post, err := p.PostRepository.FindById(id)
 	helper.PanicIfError(err)
 
-	return ToPostResponse(post)
+	return postmodel.ToPostResponse(post)
 }
 
 func (p *PostService) Update(
-	request web.PostUpdateRequest,
+	request postmodel.PostUpdateRequest,
 	loggedInUserId string,
-) web.PostResponse {
+) postmodel.PostResponse {
 	post, err := p.PostRepository.FindById(request.ID)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
@@ -89,10 +89,10 @@ func (p *PostService) Update(
 		panic(exception.NewUnauthenticatedError("forbidden"))
 	}
 
-	var updatedPost PostEntity
+	var updatedPost postmodel.PostEntity
 
 	updatedPost, err = p.PostRepository.Update(post)
 	helper.PanicIfError(err)
 
-	return ToPostResponse(updatedPost)
+	return postmodel.ToPostResponse(updatedPost)
 }

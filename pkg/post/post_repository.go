@@ -1,6 +1,8 @@
 package post
 
 import (
+	"butter/pkg/model/postmodel"
+
 	"gorm.io/gorm"
 )
 
@@ -14,20 +16,20 @@ func NewPostRepository(db *gorm.DB) *PostRepository {
 	}
 }
 
-func (p *PostRepository) Create(post PostEntity) (PostEntity, error) {
+func (p *PostRepository) Create(post postmodel.PostEntity) (postmodel.PostEntity, error) {
 	err := p.DB.Create(&post).Error
 
 	return post, err
 }
 
-func (p *PostRepository) Delete(post PostEntity) error {
+func (p *PostRepository) Delete(post postmodel.PostEntity) error {
 	err := p.DB.Delete(&post).Error
 
 	return err
 }
 
-func (p *PostRepository) FindAll() ([]PostEntity, error) {
-	var posts []PostEntity
+func (p *PostRepository) FindAll() ([]postmodel.PostEntity, error) {
+	var posts []postmodel.PostEntity
 	err := p.DB.
 		Preload("User").
 		Order("created_at desc").
@@ -36,9 +38,9 @@ func (p *PostRepository) FindAll() ([]PostEntity, error) {
 	return posts, err
 }
 
-func (p *PostRepository) FindAllByUserId(userId string) ([]PostEntity, error) {
+func (p *PostRepository) FindAllByUserId(userId string) ([]postmodel.PostEntity, error) {
 
-	var posts []PostEntity
+	var posts []postmodel.PostEntity
 	err := p.DB.
 		Preload("User").
 		Order("created_at desc").
@@ -47,14 +49,14 @@ func (p *PostRepository) FindAllByUserId(userId string) ([]PostEntity, error) {
 	return posts, err
 }
 
-func (p *PostRepository) FindById(id string) (PostEntity, error) {
-	var post PostEntity
+func (p *PostRepository) FindById(id string) (postmodel.PostEntity, error) {
+	var post postmodel.PostEntity
 	err := p.DB.Preload("User").Take(&post, "id = ?", id).Error
 
 	return post, err
 }
 
-func (p *PostRepository) Update(post PostEntity) (PostEntity, error) {
+func (p *PostRepository) Update(post postmodel.PostEntity) (postmodel.PostEntity, error) {
 	err := p.DB.
 		Model(&post).
 		Preload("User").
