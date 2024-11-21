@@ -3,7 +3,9 @@ package user
 import (
 	"butter/helper"
 	"butter/pkg/exception"
+	"butter/pkg/model/connectionmodel"
 	"butter/pkg/model/usermodel"
+	"fmt"
 	"os"
 	"time"
 
@@ -16,12 +18,14 @@ import (
 type UserService struct {
 	UserRepository UserRepository
 	// Validate       *validator.Validate
+	ConnectionRepository IConnectionRepository
 }
 
-func NewUserService(userRepository UserRepository) *UserService {
+func NewUserService(userRepository UserRepository, connectionRepository IConnectionRepository) *UserService {
 	return &UserService{
 		UserRepository: userRepository,
 		// Validate:       validate,
+		ConnectionRepository: connectionRepository,
 	}
 }
 
@@ -75,18 +79,52 @@ func (u *UserService) Delete(id string) {
 }
 
 // FindAll implements UserService.
-func (u *UserService) FindAll() []usermodel.UserResponse {
+func (u *UserService) FindAll(loggedInId string) []usermodel.UserResponse {
 	users, err := u.UserRepository.FindAll()
 	helper.PanicIfError(err)
+
+	var connections []connectionmodel.ConnectionEntity
+	fmt.Println("service: ", loggedInId)
+	if loggedInId != "" {
+		inQuery := "("
+		for index, user := range users {
+			inQuery += "(\"" + user.ID + "\", \"" + loggedInId + "\")"
+
+			if index < len(users)-1 {
+				inQuery += ", "
+			}
+		}
+		inQuery += ")"
+
+		connections, _ = u.ConnectionRepository.FindConnectionsIn(inQuery)
+
+		conMap := make(map[string]string)
+		for _, con := range connections {
+			conMap[con.FolloweeId] = con.FollowerId
+		}
+
+		for index, user := range users {
+			if _, ok := conMap[user.ID]; ok {
+				user.IsFollowed = true
+				users[index] = user
+			}
+		}
+	}
 
 	return usermodel.ToUserResponses(users)
 }
 
 // FindById implements UserService.
-func (u *UserService) FindById(id string) usermodel.UserResponse {
+func (u *UserService) FindById(id string, loggedInId string) usermodel.UserResponse {
 	user, err := u.UserRepository.FindById(id)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	if loggedInId != "" && loggedInId != id {
+		_, err := u.ConnectionRepository.FindConnection(loggedInId, id)
+
+		user.IsFollowed = err == nil
 	}
 
 	return usermodel.ToUserResponse(user)

@@ -54,7 +54,8 @@ func (u *UserController) Delete(c *fiber.Ctx) error {
 
 // FindAll implements UserController.
 func (u *UserController) FindAll(c *fiber.Ctx) error {
-	users := u.UserService.FindAll()
+	loggedInUserId := getUserId(c)
+	users := u.UserService.FindAll(loggedInUserId)
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
@@ -66,10 +67,21 @@ func (u *UserController) FindAll(c *fiber.Ctx) error {
 	return c.JSON(webResponse)
 }
 
+func getUserId(c *fiber.Ctx) string {
+	loggedInUserId, ok := c.Locals("user_id").(string)
+	if !ok {
+		loggedInUserId = ""
+	}
+
+	return loggedInUserId
+}
+
 // FindById implements UserController.
 func (u *UserController) FindById(c *fiber.Ctx) error {
 	id := c.Params("userId")
-	user := u.UserService.FindById(id)
+
+	loggedInUserId := getUserId(c)
+	user := u.UserService.FindById(id, loggedInUserId)
 
 	webResponse := model.WebResponse{
 		Code:   200,

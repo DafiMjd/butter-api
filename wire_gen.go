@@ -23,8 +23,12 @@ func InitializedServer() *fiber.App {
 	userRepository := user.UserRepository{
 		DB: db,
 	}
+	connectionRepository := &connection.ConnectionRepository{
+		DB: db,
+	}
 	userService := user.UserService{
-		UserRepository: userRepository,
+		UserRepository:       userRepository,
+		ConnectionRepository: connectionRepository,
 	}
 	userController := user.UserController{
 		UserService: userService,
@@ -39,11 +43,11 @@ func InitializedServer() *fiber.App {
 	postController := post.PostController{
 		PostService: postService,
 	}
-	connectionRepository := connection.ConnectionRepository{
+	connectionConnectionRepository := connection.ConnectionRepository{
 		DB: db,
 	}
 	connectionService := connection.ConnectionService{
-		ConnectionRepository: connectionRepository,
+		ConnectionRepository: connectionConnectionRepository,
 		UserRepository:       userRepository,
 	}
 	connectionController := connection.ConnectionController{
@@ -67,4 +71,4 @@ var ProvideUser = wire.NewSet(wire.Struct(new(user.UserRepository), "*"), wire.S
 
 var ProvidePost = wire.NewSet(wire.Struct(new(post.PostRepository), "*"), wire.Struct(new(post.PostController), "*"), wire.Struct(new(post.PostService), "*"))
 
-var ProvideConnection = wire.NewSet(wire.Struct(new(connection.ConnectionRepository), "*"), wire.Struct(new(connection.ConnectionController), "*"), wire.Struct(new(connection.ConnectionService), "*"))
+var ProvideConnection = wire.NewSet(wire.Struct(new(connection.ConnectionRepository), "*"), wire.Struct(new(connection.ConnectionController), "*"), wire.Struct(new(connection.ConnectionService), "*"), wire.Bind(new(user.IConnectionRepository), new(*connection.ConnectionRepository)))

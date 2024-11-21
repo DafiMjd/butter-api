@@ -47,4 +47,5 @@ var ProvideConnection = wire.NewSet(
 	wire.Struct(new(connection.ConnectionRepository), "*"),
 	wire.Struct(new(connection.ConnectionController), "*"),
 	wire.Struct(new(connection.ConnectionService), "*"),
+	wire.Bind(new(user.IConnectionRepository), new(*connection.ConnectionRepository)),
 )

@@ -19,6 +19,7 @@ type UserEntity struct {
 	DeletedAt  gorm.DeletedAt
 	Followers  []UserEntity `gorm:"many2many:connections;foreignKey:id;joinForeignKey:followee_id;References:id;JoinReferences:follower_id"`
 	Followings []UserEntity `gorm:"many2many:connections;foreignKey:id;joinForeignKey:follower_id;References:id;JoinReferences:followee_id"`
+	IsFollowed bool         `gorm:"-"`
 }
 
 func (a *UserEntity) TableName() string {
@@ -27,13 +28,14 @@ func (a *UserEntity) TableName() string {
 
 func ToUserResponse(entity UserEntity) UserResponse {
 	return UserResponse{
-		Id:        entity.ID,
-		Username:  entity.Username,
-		Name:      entity.Name,
-		Email:     entity.Email,
-		Birthdate: entity.Birthdate,
-		CreatedAt: entity.CreatedAt,
-		UpdatedAt: entity.UpdatedAt,
+		Id:         entity.ID,
+		Username:   entity.Username,
+		Name:       entity.Name,
+		Email:      entity.Email,
+		Birthdate:  entity.Birthdate,
+		CreatedAt:  entity.CreatedAt,
+		UpdatedAt:  entity.UpdatedAt,
+		IsFollowed: entity.IsFollowed,
 	}
 }
 

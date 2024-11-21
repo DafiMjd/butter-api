@@ -79,21 +79,13 @@ func checkToken(
 
 		id, ok := claims["sub"].(string)
 		if !ok {
-			return exception.NewUnauthenticatedError("unauthorized a")
+			return exception.NewUnauthenticatedError("unauthorized")
 		}
 
-		user := a.UserService.FindById(id)
-
-		if user.Id == "" {
-			return exception.NewUnauthenticatedError("unauthorized c")
-		}
-
-		c.Locals("user_id", user.Id)
-		c.Locals("email", user.Email)
-		c.Locals("username", user.Username)
+		c.Locals("user_id", id)
 
 		return c.Next()
 	} else {
-		return exception.NewUnauthenticatedError("unauthorized d")
+		return exception.NewUnauthenticatedError("unauthorized")
 	}
 }
