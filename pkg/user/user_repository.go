@@ -2,6 +2,7 @@ package user
 
 import (
 	"butter/pkg/model/usermodel"
+	"butter/pkg/pagination"
 	"errors"
 
 	"gorm.io/gorm"
@@ -29,9 +30,13 @@ func (u *UserRepository) Delete(user usermodel.UserEntity) error {
 	return err
 }
 
-func (u *UserRepository) FindAll() ([]usermodel.UserEntity, error) {
+func (u *UserRepository) FindAll(pgn *pagination.Pagination) ([]usermodel.UserEntity, error) {
 	var users []usermodel.UserEntity
-	err := u.DB.Order("name asc").Find(&users).Error
+	if pgn.Sort == "" {
+		pgn.Sort = "name asc"
+	}
+
+	err := u.DB.Scopes(pagination.Paginate(users, pgn, u.DB)).Find(&users).Error
 
 	return users, err
 }

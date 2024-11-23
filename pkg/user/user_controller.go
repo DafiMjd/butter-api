@@ -4,6 +4,7 @@ import (
 	"butter/pkg/exception"
 	"butter/pkg/model"
 	"butter/pkg/model/usermodel"
+	"butter/pkg/pagination"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -55,13 +56,20 @@ func (u *UserController) Delete(c *fiber.Ctx) error {
 // FindAll implements UserController.
 func (u *UserController) FindAll(c *fiber.Ctx) error {
 	loggedInUserId := getUserId(c)
-	users := u.UserService.FindAll(loggedInUserId)
+
+	pgn := pagination.Pagination{}
+	err := c.QueryParser(&pgn)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
+
+	users := u.UserService.FindAll(loggedInUserId, &pgn)
+	pgn.Docs = users
+
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
-		Data: model.MultiDocs{
-			Docs: users,
-		},
+		Data:   pgn,
 	}
 
 	return c.JSON(webResponse)

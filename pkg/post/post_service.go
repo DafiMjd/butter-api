@@ -4,6 +4,7 @@ import (
 	"butter/helper"
 	"butter/pkg/exception"
 	"butter/pkg/model/postmodel"
+	"butter/pkg/pagination"
 	"butter/pkg/user"
 
 	"github.com/google/uuid"
@@ -55,13 +56,13 @@ func (p *PostService) Delete(id string, loggedInUserId string) {
 	helper.PanicIfError(err)
 }
 
-func (p *PostService) FindAll(userId string) []postmodel.PostResponse {
+func (p *PostService) FindAll(userId string, pgn *pagination.Pagination) []postmodel.PostResponse {
 	var posts []postmodel.PostEntity
 	var err error
 	if userId == "" {
-		posts, err = p.PostRepository.FindAll()
+		posts, err = p.PostRepository.FindAll(pgn)
 	} else {
-		posts, err = p.PostRepository.FindAllByUserId(userId)
+		posts, err = p.PostRepository.FindAllByUserId(userId, pgn)
 	}
 	helper.PanicIfError(err)
 

@@ -4,6 +4,7 @@ import (
 	"butter/pkg/exception"
 	"butter/pkg/model"
 	"butter/pkg/model/postmodel"
+	"butter/pkg/pagination"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -57,13 +58,19 @@ func (p *PostController) Delete(c *fiber.Ctx) error {
 func (p *PostController) FindAll(c *fiber.Ctx) error {
 	userId := c.Query("userId")
 
-	posts := p.PostService.FindAll(userId)
+	pgn := pagination.Pagination{}
+	err := c.QueryParser(&pgn)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
+
+	posts := p.PostService.FindAll(userId, &pgn)
+	pgn.Docs = posts
+
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
-		Data: model.MultiDocs{
-			Docs: posts,
-		},
+		Data:   pgn,
 	}
 
 	return c.JSON(webResponse)

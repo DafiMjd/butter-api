@@ -2,6 +2,7 @@ package post
 
 import (
 	"butter/pkg/model/postmodel"
+	"butter/pkg/pagination"
 
 	"gorm.io/gorm"
 )
@@ -28,9 +29,10 @@ func (p *PostRepository) Delete(post postmodel.PostEntity) error {
 	return err
 }
 
-func (p *PostRepository) FindAll() ([]postmodel.PostEntity, error) {
+func (p *PostRepository) FindAll(pgn *pagination.Pagination) ([]postmodel.PostEntity, error) {
 	var posts []postmodel.PostEntity
 	err := p.DB.
+		Scopes(pagination.Paginate(posts, pgn, p.DB)).
 		Preload("User").
 		Order("created_at desc").
 		Find(&posts).Error
@@ -38,10 +40,11 @@ func (p *PostRepository) FindAll() ([]postmodel.PostEntity, error) {
 	return posts, err
 }
 
-func (p *PostRepository) FindAllByUserId(userId string) ([]postmodel.PostEntity, error) {
+func (p *PostRepository) FindAllByUserId(userId string, pgn *pagination.Pagination) ([]postmodel.PostEntity, error) {
 
 	var posts []postmodel.PostEntity
 	err := p.DB.
+		Scopes(pagination.Paginate(posts, pgn, p.DB)).
 		Preload("User").
 		Order("created_at desc").
 		Find(&posts, "user_id = ?", userId).Error

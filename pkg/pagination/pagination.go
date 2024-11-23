@@ -45,7 +45,7 @@ func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *g
 	db.Model(value).Count(&totalDocs)
 
 	pagination.TotalDocs = totalDocs
-	totalPages := int(math.Ceil(float64(totalDocs) / float64(pagination.Limit)))
+	totalPages := int(math.Ceil(float64(totalDocs) / float64(pagination.GetLimit())))
 	pagination.TotalPages = totalPages
 
 	return func(db *gorm.DB) *gorm.DB {

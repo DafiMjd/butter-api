@@ -5,7 +5,7 @@ import (
 	"butter/pkg/exception"
 	"butter/pkg/model/connectionmodel"
 	"butter/pkg/model/usermodel"
-	"fmt"
+	"butter/pkg/pagination"
 	"os"
 	"time"
 
@@ -79,13 +79,12 @@ func (u *UserService) Delete(id string) {
 }
 
 // FindAll implements UserService.
-func (u *UserService) FindAll(loggedInId string) []usermodel.UserResponse {
-	users, err := u.UserRepository.FindAll()
+func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []usermodel.UserResponse {
+	users, err := u.UserRepository.FindAll(pgn)
 	helper.PanicIfError(err)
 
 	var connections []connectionmodel.ConnectionEntity
-	fmt.Println("service: ", loggedInId)
-	if loggedInId != "" {
+	if loggedInId != "" && len(users) > 0 {
 		inQuery := "("
 		for index, user := range users {
 			inQuery += "(\"" + user.ID + "\", \"" + loggedInId + "\")"
