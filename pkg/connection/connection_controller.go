@@ -4,6 +4,7 @@ import (
 	"butter/pkg/exception"
 	"butter/pkg/model"
 	"butter/pkg/model/connectionmodel"
+	"butter/pkg/pagination"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -72,14 +73,20 @@ func (cn *ConnectionController) Unfollow(c *fiber.Ctx) error {
 
 func (cn *ConnectionController) FindAllFollowers(c *fiber.Ctx) error {
 	userId := c.Query("userId")
-	response := cn.ConnectionService.FindAllFollowers(userId)
+
+	pgn := pagination.Pagination{}
+	err := c.QueryParser(&pgn)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
+
+	response := cn.ConnectionService.FindAllFollowers(userId, &pgn)
+	pgn.Docs = response
 
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
-		Data: model.MultiDocs{
-			Docs: response,
-		},
+		Data:   pgn,
 	}
 
 	return c.JSON(webResponse)
@@ -87,14 +94,19 @@ func (cn *ConnectionController) FindAllFollowers(c *fiber.Ctx) error {
 
 func (cn *ConnectionController) FindAllFollowings(c *fiber.Ctx) error {
 	userId := c.Query("userId")
-	response := cn.ConnectionService.FindAllFollowings(userId)
+	pgn := pagination.Pagination{}
+	err := c.QueryParser(&pgn)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
+
+	response := cn.ConnectionService.FindAllFollowings(userId, &pgn)
+	pgn.Docs = response
 
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
-		Data: model.MultiDocs{
-			Docs: response,
-		},
+		Data:   pgn,
 	}
 
 	return c.JSON(webResponse)

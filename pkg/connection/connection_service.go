@@ -5,6 +5,7 @@ import (
 	"butter/pkg/exception"
 	"butter/pkg/model/connectionmodel"
 	"butter/pkg/model/usermodel"
+	"butter/pkg/pagination"
 	"butter/pkg/user"
 )
 
@@ -24,7 +25,12 @@ func NewConnectionService(
 }
 
 func (c *ConnectionService) Follow(request connectionmodel.FollowRequest) usermodel.UserResponse {
-	users, err := c.UserRepository.FindAllByIds([]string{request.FollowerId, request.FolloweeId})
+	users, err := c.UserRepository.FindAllByIds(
+		[]string{request.FollowerId, request.FolloweeId},
+		&pagination.Pagination{
+			Limit: 2,
+		},
+	)
 
 	if err != nil || len(users) != 2 {
 		panic(exception.NewNotFoundError(err.Error()))
@@ -38,6 +44,7 @@ func (c *ConnectionService) Follow(request connectionmodel.FollowRequest) usermo
 			followee = user
 		}
 	}
+	followee.IsFollowed = true
 
 	err = c.ConnectionRepository.Follow(connection)
 	helper.PanicIfError(err)
@@ -46,7 +53,13 @@ func (c *ConnectionService) Follow(request connectionmodel.FollowRequest) usermo
 }
 
 func (c *ConnectionService) Unfollow(request connectionmodel.FollowRequest) usermodel.UserResponse {
-	users, err := c.UserRepository.FindAllByIds([]string{request.FollowerId, request.FolloweeId})
+	users, err := c.UserRepository.
+		FindAllByIds(
+			[]string{request.FollowerId, request.FolloweeId},
+			&pagination.Pagination{
+				Limit: 2,
+			},
+		)
 
 	if err != nil || len(users) != 2 {
 		panic(exception.NewNotFoundError(err.Error()))
@@ -67,16 +80,22 @@ func (c *ConnectionService) Unfollow(request connectionmodel.FollowRequest) user
 	return usermodel.ToUserResponse(followee)
 }
 
-func (c *ConnectionService) FindAllFollowers(userId string) []usermodel.UserResponse {
-	followers, err := c.ConnectionRepository.FindAllFollowers(userId)
+func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
+	followersId, err := c.ConnectionRepository.FindAllFollowerId(userId)
 	helper.PanicIfError(err)
 
-	return usermodel.ToUserResponses(followers)
+	users, err := c.UserRepository.FindAllByIds(followersId, pgn)
+	helper.PanicIfError(err)
+
+	return usermodel.ToUserResponses(users)
 }
 
-func (c *ConnectionService) FindAllFollowings(userId string) []usermodel.UserResponse {
-	followers, err := c.ConnectionRepository.FindAllFollowings(userId)
+func (c *ConnectionService) FindAllFollowings(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
+	followeesId, err := c.ConnectionRepository.FindAllFolloweeId(userId)
 	helper.PanicIfError(err)
 
-	return usermodel.ToUserResponses(followers)
+	users, err := c.UserRepository.FindAllByIds(followeesId, pgn)
+	helper.PanicIfError(err)
+
+	return usermodel.ToUserResponses(users)
 }

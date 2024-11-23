@@ -4,6 +4,7 @@ import (
 	"butter/pkg/model/usermodel"
 	"butter/pkg/pagination"
 	"errors"
+	"math"
 
 	"gorm.io/gorm"
 )
@@ -75,9 +76,22 @@ func (u *UserRepository) ChangePassword(id string, password string) error {
 	return err
 }
 
-func (u *UserRepository) FindAllByIds(ids []string) ([]usermodel.UserEntity, error) {
+func (u *UserRepository) FindAllByIds(ids []string, pgn *pagination.Pagination) ([]usermodel.UserEntity, error) {
 	var users []usermodel.UserEntity
-	err := u.DB.Where("id IN ?", ids).Order("name asc").Find(&users).Error
+	err := u.DB.
+		Scopes(pagination.PaginateOnly(
+			users,
+			pgn,
+			u.DB,
+		)).
+		Where("id IN ?", ids).
+		Find(&users).Error
+
+	var totalDocs int64
+	u.DB.Model(users).Where("id IN ?", ids).Count(&totalDocs)
+	pgn.TotalDocs = totalDocs
+	totalPages := int(math.Ceil(float64(totalDocs) / float64(pgn.GetLimit())))
+	pgn.TotalPages = totalPages
 
 	return users, err
 }

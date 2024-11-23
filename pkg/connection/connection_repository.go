@@ -2,7 +2,6 @@ package connection
 
 import (
 	"butter/pkg/model/connectionmodel"
-	"butter/pkg/model/usermodel"
 
 	"gorm.io/gorm"
 )
@@ -29,18 +28,28 @@ func (c *ConnectionRepository) Unfollow(connection connectionmodel.ConnectionEnt
 	return err
 }
 
-func (c *ConnectionRepository) FindAllFollowers(userId string) ([]usermodel.UserEntity, error) {
-	var user usermodel.UserEntity
-	err := c.DB.Preload("Followers").First(&user, "id = ?", userId).Error
+func (c *ConnectionRepository) FindAllFollowerId(userId string) ([]string, error) {
+	var connections []connectionmodel.ConnectionEntity
+	err := c.DB.Find(&connections, "followee_id = ?", userId).Error
+	ids := []string{}
 
-	return user.Followers, err
+	for _, connection := range connections {
+		ids = append(ids, connection.FollowerId)
+	}
+
+	return ids, err
 }
 
-func (c *ConnectionRepository) FindAllFollowings(userId string) ([]usermodel.UserEntity, error) {
-	var user usermodel.UserEntity
-	err := c.DB.Preload("Followings").First(&user, "id = ?", userId).Error
+func (c *ConnectionRepository) FindAllFolloweeId(userId string) ([]string, error) {
+	var connections []connectionmodel.ConnectionEntity
+	err := c.DB.Find(&connections, "follower_id = ?", userId).Error
+	ids := []string{}
 
-	return user.Followings, err
+	for _, connection := range connections {
+		ids = append(ids, connection.FolloweeId)
+	}
+
+	return ids, err
 }
 
 func (c *ConnectionRepository) FindConnection(followerId string, followeeId string) (connectionmodel.ConnectionEntity, error) {
