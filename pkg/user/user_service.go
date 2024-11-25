@@ -99,7 +99,7 @@ func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []u
 
 		conMap := make(map[string]string)
 		for _, con := range connections {
-			conMap[con.FolloweeId] = con.FollowerId
+			conMap[con.FolloweeId.String] = con.FollowerId.String
 		}
 
 		for index, user := range users {
