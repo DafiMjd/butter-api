@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS butter.users (
     primary key (id)
 ) engine = InnoDB;
 
-CREATE TABLE IF NOT EXISTS butter.connection (
+CREATE TABLE IF NOT EXISTS butter.connections (
     followee_id varchar(40) not null,
     follower_id varchar(40) not null,
     primary key (followee_id, follower_id),
