@@ -56,7 +56,7 @@ func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *g
 	}
 }
 
-func PaginateOnly(value interface{}, pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
+func PaginateOnly(pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.
 			Offset(pagination.GetOffset()).

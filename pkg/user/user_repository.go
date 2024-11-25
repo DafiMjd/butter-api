@@ -80,7 +80,6 @@ func (u *UserRepository) FindAllByIds(ids []string, pgn *pagination.Pagination) 
 	var users []usermodel.UserEntity
 	err := u.DB.
 		Scopes(pagination.PaginateOnly(
-			users,
 			pgn,
 			u.DB,
 		)).

@@ -93,15 +93,57 @@ func (c *ConnectionService) Unfollow(request connectionmodel.FollowRequest) user
 }
 
 func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	users, err := c.ConnectionRepository.FindAllFollowers(userId)
+	rows, err := c.ConnectionRepository.FindAllFollowers(userId, pgn)
 	helper.PanicIfError(err)
+
+	defer rows.Close()
+
+	var users []usermodel.UserEntity
+	for rows.Next() {
+		user := usermodel.UserEntity{}
+		conn := connectionmodel.ConnectionEntity{}
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Name,
+			&user.Birthdate,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&conn.FolloweeId,
+			&conn.FollowerId,
+		)
+		user.IsFollowed = conn.FolloweeId.Valid
+		helper.PanicIfError(err)
+		users = append(users, user)
+	}
 
 	return usermodel.ToUserResponses(users)
 }
 
 func (c *ConnectionService) FindAllFollowings(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	users, err := c.ConnectionRepository.FindAllFollowings(userId)
+	rows, err := c.ConnectionRepository.FindAllFollowings(userId, pgn)
 	helper.PanicIfError(err)
+
+	defer rows.Close()
+
+	var users []usermodel.UserEntity
+	for rows.Next() {
+		user := usermodel.UserEntity{
+			IsFollowed: true,
+		}
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Name,
+			&user.Birthdate,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		helper.PanicIfError(err)
+		users = append(users, user)
+	}
 
 	return usermodel.ToUserResponses(users)
 }

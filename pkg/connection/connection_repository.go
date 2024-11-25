@@ -1,10 +1,9 @@
 package connection
 
 import (
-	"butter/helper"
 	"butter/pkg/model/connectionmodel"
-	"butter/pkg/model/usermodel"
-	"fmt"
+	"butter/pkg/pagination"
+	"database/sql"
 
 	"gorm.io/gorm"
 )
@@ -34,63 +33,35 @@ func (c *ConnectionRepository) Unfollow(connection connectionmodel.ConnectionEnt
 	return err
 }
 
-func (c *ConnectionRepository) FindAllFollowers(userId string) ([]usermodel.UserEntity, error) {
+func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.Pagination) (*sql.Rows, error) {
 	rows, err := c.DB.
 		Table("users").
+		Scopes(pagination.PaginateOnly(
+			pgn,
+			c.DB,
+		)).
 		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "b.followee_id", "b.follower_id").
 		Joins("INNER JOIN connections a ON users.id = a.follower_id").
 		Joins("LEFT JOIN connections b ON users.id = b.followee_id AND b.follower_id = ?", userId).
 		Where("a.followee_id = ?", userId).
 		Rows()
-	helper.PanicIfError(err)
-	defer rows.Close()
 
-	var users []usermodel.UserEntity
-	for rows.Next() {
-		user := usermodel.UserEntity{}
-		conn := connectionmodel.ConnectionEntity{}
-		err := rows.Scan(
-			&user.ID,
-			&user.Username,
-			&user.Email,
-			&user.Name,
-			&user.Birthdate,
-			&user.CreatedAt,
-			&user.UpdatedAt,
-			&conn.FolloweeId,
-			&conn.FollowerId,
-		)
-		user.IsFollowed = conn.FolloweeId.Valid
-		helper.PanicIfError(err)
-		fmt.Println("new")
-		fmt.Println(user)
-		users = append(users, user)
-	}
-
-	return users, err
+	return rows, err
 }
 
-func (c *ConnectionRepository) FindAllFollowings(userId string) ([]usermodel.UserEntity, error) {
+func (c *ConnectionRepository) FindAllFollowings(userId string, pgn *pagination.Pagination) (*sql.Rows, error) {
 	rows, err := c.DB.
 		Table("users").
+		Scopes(pagination.PaginateOnly(
+			pgn,
+			c.DB,
+		)).
 		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at").
 		Joins("inner join connections on users.id = connections.followee_id").
 		Where("connections.follower_id = ?", userId).
 		Rows()
-	helper.PanicIfError(err)
-	defer rows.Close()
 
-	var users []usermodel.UserEntity
-	for rows.Next() {
-		user := usermodel.UserEntity{
-			IsFollowed: true,
-		}
-		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Name, &user.Birthdate, &user.CreatedAt, &user.UpdatedAt)
-		helper.PanicIfError(err)
-		users = append(users, user)
-	}
-
-	return users, err
+	return rows, err
 }
 
 func (c *ConnectionRepository) FindConnection(followerId string, followeeId string) (connectionmodel.ConnectionEntity, error) {
