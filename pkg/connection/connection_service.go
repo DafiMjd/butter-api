@@ -37,18 +37,23 @@ func (c *ConnectionService) Follow(request connectionmodel.FollowRequest) usermo
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	var followee usermodel.UserEntity
-	for _, user := range users {
-		if user.ID == request.FolloweeId {
-			followee = user
-		}
-	}
-	followee.IsFollowed = true
-
 	connection := connectionmodel.ConnectionEntity{
 		FolloweeId: ctype.NewNullString(request.FolloweeId),
 		FollowerId: ctype.NewNullString(request.FollowerId),
 	}
+
+	var followee usermodel.UserEntity
+	for _, user := range users {
+		if user.ID == request.FolloweeId {
+			followee = user
+			connection.FolloweeUsername = user.Username
+		}
+
+		if user.ID == request.FollowerId {
+			connection.FollowerUsername = user.Username
+		}
+	}
+	followee.IsFollowed = true
 
 	err = c.ConnectionRepository.Follow(connection)
 	helper.PanicIfError(err)
