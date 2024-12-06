@@ -1,6 +1,6 @@
 package postmodel
 
 type PostCreateRequest struct {
-	UserId  string `json:"userId"`
+	UserId  string
 	Content string `json:"content"`
 }

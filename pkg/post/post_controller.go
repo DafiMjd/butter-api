@@ -26,6 +26,12 @@ func (p *PostController) Create(c *fiber.Ctx) error {
 		panic(exception.NewBadRequestError(err.Error()))
 	}
 
+	loggedInUserId, ok := c.Locals("user_id").(string)
+	if !ok {
+		panic(exception.NewUnauthenticatedError("unauthorized"))
+	}
+	postCreateRequest.UserId = loggedInUserId
+
 	userResponse := p.PostService.Create(postCreateRequest)
 	webResponse := model.WebResponse{
 		Code:   200,
