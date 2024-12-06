@@ -1,13 +1,12 @@
 package main
 
 import (
-	"butter/initializers"
 	"os"
 )
 
-func init() {
-	initializers.LoadEnvVariables()
-}
+// func init() {
+// 	initializers.LoadEnvVariables()
+// }
 
 func main() {
 	app := InitializedServer()
