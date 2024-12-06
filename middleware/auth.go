@@ -4,7 +4,6 @@ import (
 	"butter/helper"
 	"butter/pkg/exception"
 	"butter/pkg/user"
-	"fmt"
 	"strings"
 	"time"
 
@@ -82,8 +81,6 @@ func checkToken(
 		if !ok {
 			return exception.NewUnauthenticatedError("unauthorized")
 		}
-
-		fmt.Println("disini")
 
 		c.Locals("user_id", id)
 

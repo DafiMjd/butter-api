@@ -6,7 +6,6 @@ import (
 	"butter/pkg/model"
 	"butter/pkg/model/usermodel"
 	"butter/pkg/pagination"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,7 +20,6 @@ func NewUserController(userService UserService) *UserController {
 	}
 }
 
-// Create implements UserController.
 func (u *UserController) Create(c *fiber.Ctx) error {
 	userCreateRequest := usermodel.UserCreateRequest{}
 	err := c.BodyParser(&userCreateRequest)
@@ -41,7 +39,6 @@ func (u *UserController) Create(c *fiber.Ctx) error {
 	return c.JSON(webResponse)
 }
 
-// Delete implements UserController.
 func (u *UserController) Delete(c *fiber.Ctx) error {
 	id := c.Params("userId")
 	checkUserId(c, id)
@@ -55,7 +52,6 @@ func (u *UserController) Delete(c *fiber.Ctx) error {
 	return c.JSON(webResponse)
 }
 
-// FindAll implements UserController.
 func (u *UserController) FindAll(c *fiber.Ctx) error {
 	loggedInUserId := getUserId(c)
 
@@ -86,7 +82,6 @@ func getUserId(c *fiber.Ctx) string {
 	return loggedInUserId
 }
 
-// FindById implements UserController.
 func (u *UserController) FindById(c *fiber.Ctx) error {
 	id := c.Params("userId")
 
@@ -104,7 +99,23 @@ func (u *UserController) FindById(c *fiber.Ctx) error {
 	return c.JSON(webResponse)
 }
 
-// LoginWithEmail implements UserController.
+func (u *UserController) FindByUsername(c *fiber.Ctx) error {
+	username := c.Query("username")
+
+	loggedInUserId := getUserId(c)
+	user := u.UserService.FindByUsername(username, loggedInUserId)
+
+	webResponse := model.WebResponse{
+		Code:   200,
+		Status: "success",
+		Data: model.SingleDoc{
+			Doc: user,
+		},
+	}
+
+	return c.JSON(webResponse)
+}
+
 func (u *UserController) LoginWithEmail(c *fiber.Ctx) error {
 	loginRequest := usermodel.LoginRequest{}
 	err := c.BodyParser(&loginRequest)
@@ -170,8 +181,6 @@ func (u *UserController) Update(c *fiber.Ctx) error {
 
 func checkUserId(c *fiber.Ctx, paramUserId string) {
 	loggedInUserId, ok := c.Locals("user_id").(string)
-	fmt.Println(paramUserId)
-	fmt.Println(loggedInUserId)
 	if !ok || loggedInUserId != paramUserId {
 		panic(exception.NewUnauthenticatedError("unauthorized no"))
 	}

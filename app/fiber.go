@@ -37,6 +37,7 @@ func NewFiber(hs FiberHandlerSet, am *middleware.AuthMiddleware) *fiber.App {
 	butterGroup.Post("/signup", hs.UserController.Create)
 	butterGroup.Get("/users", am.AuthenticateFiber(true), hs.UserController.FindAll)
 	butterGroup.Get("/user/:userId", am.AuthenticateFiber(true), hs.UserController.FindById)
+	butterGroup.Get("/user-username", am.AuthenticateFiber(true), hs.UserController.FindByUsername)
 	butterGroup.Put("/user/:userId", am.AuthenticateFiber(false), hs.UserController.Update)
 	butterGroup.Delete("/user/:userId", am.AuthenticateFiber(false), hs.UserController.Delete)
 	butterGroup.Post("/refresh-token", am.AuthenticateRefreshToken(), hs.UserController.RefreshToken)

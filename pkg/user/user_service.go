@@ -106,7 +106,6 @@ func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []u
 	return usermodel.ToUserResponses(users)
 }
 
-// FindById implements UserService.
 func (u *UserService) FindById(id string, loggedInId string) usermodel.UserResponse {
 	user, err := u.UserRepository.FindById(id)
 	if err != nil {
@@ -115,6 +114,21 @@ func (u *UserService) FindById(id string, loggedInId string) usermodel.UserRespo
 
 	if loggedInId != "" && loggedInId != id {
 		_, err := u.ConnectionRepository.FindConnection(loggedInId, id)
+
+		user.IsFollowed = err == nil
+	}
+
+	return usermodel.ToUserResponse(user)
+}
+
+func (u *UserService) FindByUsername(username string, loggedInId string) usermodel.UserResponse {
+	user, err := u.UserRepository.FindBy("username = ?", username)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	if loggedInId != "" && loggedInId != user.ID.String() {
+		_, err := u.ConnectionRepository.FindConnection(loggedInId, user.ID.String())
 
 		user.IsFollowed = err == nil
 	}
