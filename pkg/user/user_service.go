@@ -38,7 +38,7 @@ func (u *UserService) Create(request usermodel.UserCreateRequest) usermodel.Logi
 	helper.PanicIfError(err)
 
 	newUser := usermodel.UserEntity{
-		ID:        uuid.New().String(),
+		ID:        uuid.New(),
 		Username:  request.Username,
 		Password:  string(hash),
 		Name:      request.Name,
@@ -85,25 +85,25 @@ func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []u
 
 	var connections []connectionmodel.ConnectionEntity
 	if loggedInId != "" && len(users) > 0 {
-		inQuery := "("
+		inQuery := ""
 		for index, user := range users {
-			inQuery += "(\"" + user.ID + "\", \"" + loggedInId + "\")"
+			inQuery += "(\"" + user.ID.String() + "\", \"" + loggedInId + "\")"
 
 			if index < len(users)-1 {
 				inQuery += ", "
 			}
 		}
-		inQuery += ")"
+		// inQuery += ")"
 
 		connections, _ = u.ConnectionRepository.FindConnectionsIn(inQuery)
 
 		conMap := make(map[string]string)
 		for _, con := range connections {
-			conMap[con.FolloweeId.String] = con.FollowerId.String
+			conMap[con.FolloweeId.String()] = con.FollowerId.String()
 		}
 
 		for index, user := range users {
-			if _, ok := conMap[user.ID]; ok {
+			if _, ok := conMap[user.ID.String()]; ok {
 				user.IsFollowed = true
 				users[index] = user
 			}

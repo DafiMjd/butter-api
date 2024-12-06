@@ -2,7 +2,6 @@ package connection
 
 import (
 	"butter/helper"
-	"butter/pkg/ctype"
 	"butter/pkg/exception"
 	"butter/pkg/model/connectionmodel"
 	"butter/pkg/model/usermodel"
@@ -38,18 +37,18 @@ func (c *ConnectionService) Follow(request connectionmodel.FollowRequest) usermo
 	}
 
 	connection := connectionmodel.ConnectionEntity{
-		FolloweeId: ctype.NewNullString(request.FolloweeId),
-		FollowerId: ctype.NewNullString(request.FollowerId),
+		FolloweeId: helper.StringToUUID(request.FolloweeId),
+		FollowerId: helper.StringToUUID(request.FollowerId),
 	}
 
 	var followee usermodel.UserEntity
 	for _, user := range users {
-		if user.ID == request.FolloweeId {
+		if user.ID.String() == request.FolloweeId {
 			followee = user
 			connection.FolloweeUsername = user.Username
 		}
 
-		if user.ID == request.FollowerId {
+		if user.ID.String() == request.FollowerId {
 			connection.FollowerUsername = user.Username
 		}
 	}
@@ -76,14 +75,14 @@ func (c *ConnectionService) Unfollow(request connectionmodel.FollowRequest) user
 
 	var followee usermodel.UserEntity
 	for _, user := range users {
-		if user.ID == request.FolloweeId {
+		if user.ID.String() == request.FolloweeId {
 			followee = user
 		}
 	}
 
 	connection := connectionmodel.ConnectionEntity{
-		FolloweeId: ctype.NewNullString(request.FolloweeId),
-		FollowerId: ctype.NewNullString(request.FollowerId),
+		FolloweeId: helper.StringToUUID(request.FolloweeId),
+		FollowerId: helper.StringToUUID(request.FollowerId),
 	}
 
 	err = c.ConnectionRepository.Unfollow(connection)
@@ -113,7 +112,7 @@ func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagi
 			&conn.FolloweeId,
 			&conn.FollowerId,
 		)
-		user.IsFollowed = conn.FolloweeId.Valid
+		user.IsFollowed = conn.FolloweeId.String() != ""
 		helper.PanicIfError(err)
 		users = append(users, user)
 	}

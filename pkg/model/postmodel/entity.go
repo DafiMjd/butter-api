@@ -4,11 +4,12 @@ import (
 	"butter/pkg/model/usermodel"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type PostEntity struct {
-	ID        string    `gorm:"primary_key;column:id"`
+	ID        uuid.UUID `gorm:"primary_key;column:id"`
 	UserId    string    `gorm:"column:user_id"`
 	Content   string    `gorm:"column:content"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
@@ -23,7 +24,7 @@ func (a *PostEntity) TableName() string {
 
 func ToPostResponse(post PostEntity) PostResponse {
 	return PostResponse{
-		ID:           post.ID,
+		ID:           post.ID.String(),
 		UserId:       post.UserId,
 		Content:      post.Content,
 		CreatedAt:    post.CreatedAt,

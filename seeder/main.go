@@ -32,7 +32,7 @@ func handleArgs() {
 			for i := 0; i < 100; i++ {
 				username := "seed user " + strconv.Itoa(i)
 				users = append(users, usermodel.UserEntity{
-					ID:       uuid.New().String(),
+					ID:       uuid.New(),
 					Username: username,
 					Password: username,
 					Email:    username,

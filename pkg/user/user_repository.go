@@ -46,7 +46,7 @@ func (u *UserRepository) FindById(id string) (usermodel.UserEntity, error) {
 	var user usermodel.UserEntity
 	err := u.DB.Take(&user, "id = ?", id).Error
 
-	if user.ID == "" {
+	if user.ID.String() == "" {
 		return user, errors.New("user not found")
 	} else {
 		return user, err
@@ -63,7 +63,7 @@ func (u *UserRepository) FindBy(query string, value interface{}) (usermodel.User
 	var user usermodel.UserEntity
 	err := u.DB.Take(&user, query, value).Error
 
-	if user.ID == "" {
+	if user.ID.String() == "" {
 		return user, errors.New("user not found")
 	} else {
 		return user, err

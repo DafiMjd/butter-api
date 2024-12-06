@@ -31,7 +31,7 @@ func (p *PostService) Create(request postmodel.PostCreateRequest) postmodel.Post
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 	post := postmodel.PostEntity{
-		ID:      uuid.New().String(),
+		ID:      uuid.New(),
 		UserId:  request.UserId,
 		Content: request.Content,
 		User:    user,

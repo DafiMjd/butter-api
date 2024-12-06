@@ -35,14 +35,14 @@ func (c *ConnectionRepository) Unfollow(connection connectionmodel.ConnectionEnt
 
 func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.Pagination) (*sql.Rows, error) {
 	rows, err := c.DB.
-		Table("users").
+		Table("butter.users u").
 		Scopes(pagination.PaginateOnly(
 			pgn,
 			c.DB,
 		)).
 		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "b.followee_id", "b.follower_id").
-		Joins("INNER JOIN connections a ON users.id = a.follower_id").
-		Joins("LEFT JOIN connections b ON users.id = b.followee_id AND b.follower_id = ?", userId).
+		Joins("INNER JOIN butter.connections a ON u.id = a.follower_id").
+		Joins("LEFT JOIN butter.connections b ON u.id = b.followee_id AND b.follower_id = ?", userId).
 		Where("a.followee_id = ?", userId).
 		Rows()
 
@@ -51,14 +51,14 @@ func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.P
 
 func (c *ConnectionRepository) FindAllFollowings(userId string, pgn *pagination.Pagination) (*sql.Rows, error) {
 	rows, err := c.DB.
-		Table("users").
+		Table("butter.users a").
 		Scopes(pagination.PaginateOnly(
 			pgn,
 			c.DB,
 		)).
 		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at").
-		Joins("inner join connections on users.id = connections.followee_id").
-		Where("connections.follower_id = ?", userId).
+		Joins("inner join butter.connections b on a.id = b.followee_id").
+		Where("b.follower_id = ?", userId).
 		Rows()
 
 	return rows, err

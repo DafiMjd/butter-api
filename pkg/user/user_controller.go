@@ -1,10 +1,12 @@
 package user
 
 import (
+	"butter/helper"
 	"butter/pkg/exception"
 	"butter/pkg/model"
 	"butter/pkg/model/usermodel"
 	"butter/pkg/pagination"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -130,12 +132,12 @@ func (u *UserController) LoginWithUsername(c *fiber.Ctx) error {
 		panic(exception.NewBadRequestError(err.Error()))
 	}
 
-	user := u.UserService.LoginWithUsername(loginRequest)
+	loginResponse := u.UserService.LoginWithUsername(loginRequest)
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",
 		Data: model.SingleDoc{
-			Doc: user,
+			Doc: loginResponse,
 		},
 	}
 
@@ -168,8 +170,10 @@ func (u *UserController) Update(c *fiber.Ctx) error {
 
 func checkUserId(c *fiber.Ctx, paramUserId string) {
 	loggedInUserId, ok := c.Locals("user_id").(string)
+	fmt.Println(paramUserId)
+	fmt.Println(loggedInUserId)
 	if !ok || loggedInUserId != paramUserId {
-		panic(exception.NewUnauthenticatedError("unauthorized"))
+		panic(exception.NewUnauthenticatedError("unauthorized no"))
 	}
 }
 
@@ -179,7 +183,11 @@ func (u *UserController) RefreshToken(c *fiber.Ctx) error {
 		panic(exception.NewUnauthenticatedError("unauthorized"))
 	}
 
-	response := u.UserService.RefreshToken(usermodel.UserEntity{ID: id})
+	response := u.UserService.RefreshToken(
+		usermodel.UserEntity{
+			ID: helper.StringToUUID(id),
+		},
+	)
 	webResponse := model.WebResponse{
 		Code:   200,
 		Status: "success",

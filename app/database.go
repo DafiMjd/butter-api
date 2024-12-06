@@ -4,20 +4,20 @@ import (
 	"os"
 	"time"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 func NewDb() *gorm.DB {
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	schema := os.Getenv("DB_SCHEMA")
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	schema := os.Getenv("POSTGRES_SCHEMA")
 
-	dsn := user + ":" + password + "@tcp(localhost:" + port + ")/" + schema + "?charset=utf8mb4&parseTime=True&loc=Local"
-	dialect := mysql.Open(dsn)
-	db, err := gorm.Open(dialect, &gorm.Config{
+	dsn := "host=localhost user=" + user + " password=" + password + " dbname=" + schema + " port=" + port + " sslmode=disable TimeZone=Asia/Jakarta"
+	// dsn := user + ":" + password + "@tcp(localhost:" + port + ")/" + schema + "?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {

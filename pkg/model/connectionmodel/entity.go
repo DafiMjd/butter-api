@@ -1,11 +1,13 @@
 package connectionmodel
 
-import "butter/pkg/ctype"
+import (
+	"github.com/google/uuid"
+)
 
 type ConnectionEntity struct {
-	FolloweeId       ctype.NullString `gorm:"primaryKey"`
+	FolloweeId       uuid.UUID `gorm:"primaryKey"`
 	FolloweeUsername string
-	FollowerId       ctype.NullString `gorm:"primaryKey"`
+	FollowerId       uuid.UUID `gorm:"primaryKey"`
 	FollowerUsername string
 }
 

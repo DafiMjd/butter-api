@@ -5,11 +5,12 @@ import (
 	"butter/pkg/model/connectionmodel"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type UserEntity struct {
-	ID                  string         `gorm:"primary_key;column:id"`
+	ID                  uuid.UUID      `gorm:"primary_key;column:id"`
 	Username            string         `gorm:"column:username"`
 	Password            string         `gorm:"column:password"`
 	Email               string         `gorm:"column:email"`
@@ -28,7 +29,7 @@ func (a *UserEntity) TableName() string {
 
 func ToUserResponse(entity UserEntity) UserResponse {
 	return UserResponse{
-		Id:         entity.ID,
+		Id:         entity.ID.String(),
 		Username:   entity.Username,
 		Name:       entity.Name,
 		Email:      entity.Email,
