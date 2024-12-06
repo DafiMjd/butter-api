@@ -2,6 +2,7 @@ package main
 
 import (
 	"butter/initializers"
+	"os"
 )
 
 func init() {
@@ -11,7 +12,13 @@ func init() {
 func main() {
 	app := InitializedServer()
 
-	err := app.Listen("localhost:5000")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "3000"
+	}
+
+	err := app.Listen("0.0.0.0:" + port)
 	if err != nil {
 		panic(err)
 	}
