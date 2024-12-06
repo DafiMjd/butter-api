@@ -50,3 +50,12 @@ func SaveJsonToFile(path string, value interface{}) error {
 func StringToUUID(id string) uuid.UUID {
 	return uuid.Must(uuid.Parse((id)))
 }
+
+func IsUUIDValid(u string) bool {
+	if u == "00000000-0000-0000-0000-000000000000" {
+		return false
+	}
+
+	_, err := uuid.Parse(u)
+	return err == nil
+}

@@ -80,34 +80,27 @@ func (u *UserService) Delete(id string) {
 
 // FindAll implements UserService.
 func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	users, err := u.UserRepository.FindAll(pgn)
+	rows, err := u.UserRepository.FindAll(pgn, loggedInId)
 	helper.PanicIfError(err)
 
-	var connections []connectionmodel.ConnectionEntity
-	if loggedInId != "" && len(users) > 0 {
-		inQuery := ""
-		for index, user := range users {
-			inQuery += "(\"" + user.ID.String() + "\", \"" + loggedInId + "\")"
-
-			if index < len(users)-1 {
-				inQuery += ", "
-			}
-		}
-		// inQuery += ")"
-
-		connections, _ = u.ConnectionRepository.FindConnectionsIn(inQuery)
-
-		conMap := make(map[string]string)
-		for _, con := range connections {
-			conMap[con.FolloweeId.String()] = con.FollowerId.String()
-		}
-
-		for index, user := range users {
-			if _, ok := conMap[user.ID.String()]; ok {
-				user.IsFollowed = true
-				users[index] = user
-			}
-		}
+	var users []usermodel.UserEntity
+	for rows.Next() {
+		user := usermodel.UserEntity{}
+		conn := connectionmodel.ConnectionEntity{}
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Name,
+			&user.Birthdate,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&conn.FolloweeId,
+			&conn.FollowerId,
+		)
+		user.IsFollowed = helper.IsUUIDValid(conn.FollowerId.String())
+		helper.PanicIfError(err)
+		users = append(users, user)
 	}
 
 	return usermodel.ToUserResponses(users)

@@ -112,7 +112,8 @@ func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagi
 			&conn.FolloweeId,
 			&conn.FollowerId,
 		)
-		user.IsFollowed = conn.FolloweeId.String() != ""
+
+		user.IsFollowed = helper.IsUUIDValid(conn.FollowerId.String())
 		helper.PanicIfError(err)
 		users = append(users, user)
 	}

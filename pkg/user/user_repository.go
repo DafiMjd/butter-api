@@ -3,6 +3,7 @@ package user
 import (
 	"butter/pkg/model/usermodel"
 	"butter/pkg/pagination"
+	"database/sql"
 	"errors"
 	"math"
 
@@ -31,15 +32,20 @@ func (u *UserRepository) Delete(user usermodel.UserEntity) error {
 	return err
 }
 
-func (u *UserRepository) FindAll(pgn *pagination.Pagination) ([]usermodel.UserEntity, error) {
+func (u *UserRepository) FindAll(pgn *pagination.Pagination, loggedInId string) (*sql.Rows, error) {
 	var users []usermodel.UserEntity
 	if pgn.Sort == "" {
 		pgn.Sort = "name asc"
 	}
 
-	err := u.DB.Scopes(pagination.Paginate(users, pgn, u.DB)).Find(&users).Error
+	rows, err := u.DB.
+		Table("butter.users a").
+		Scopes(pagination.Paginate(users, pgn, u.DB)).
+		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "b.followee_id", "b.follower_id").
+		Joins("left join butter.connections b on a.id = b.followee_id and b.follower_id = ?", loggedInId).
+		Rows()
 
-	return users, err
+	return rows, err
 }
 
 func (u *UserRepository) FindById(id string) (usermodel.UserEntity, error) {

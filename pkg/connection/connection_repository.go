@@ -40,9 +40,9 @@ func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.P
 			pgn,
 			c.DB,
 		)).
-		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "b.followee_id", "b.follower_id").
+		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "a.followee_id", "a.follower_id").
 		Joins("INNER JOIN butter.connections a ON u.id = a.follower_id").
-		Joins("LEFT JOIN butter.connections b ON u.id = b.followee_id AND b.follower_id = ?", userId).
+		// Joins("LEFT JOIN butter.connections b ON u.id = b.followee_id AND b.follower_id = ?", userId).
 		Where("a.followee_id = ?", userId).
 		Rows()
 
