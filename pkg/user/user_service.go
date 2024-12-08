@@ -80,10 +80,18 @@ func (u *UserService) Delete(id string) {
 
 // FindAll implements UserService.
 func (u *UserService) FindAll(loggedInId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	rows, err := u.UserRepository.FindAll(pgn, loggedInId)
-	helper.PanicIfError(err)
 
 	var users []usermodel.UserEntity
+	if loggedInId == "" {
+		users, err := u.UserRepository.FindAll(pgn)
+		helper.PanicIfError(err)
+
+		return usermodel.ToUserResponses(users)
+	}
+
+	rows, err := u.UserRepository.FindAllWithIsFollowed(pgn, loggedInId)
+	helper.PanicIfError(err)
+
 	for rows.Next() {
 		user := usermodel.UserEntity{}
 		conn := connectionmodel.ConnectionEntity{}

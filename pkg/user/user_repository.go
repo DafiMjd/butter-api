@@ -32,7 +32,7 @@ func (u *UserRepository) Delete(user usermodel.UserEntity) error {
 	return err
 }
 
-func (u *UserRepository) FindAll(pgn *pagination.Pagination, loggedInId string) (*sql.Rows, error) {
+func (u *UserRepository) FindAllWithIsFollowed(pgn *pagination.Pagination, loggedInId string) (*sql.Rows, error) {
 	var users []usermodel.UserEntity
 	if pgn.Sort == "" {
 		pgn.Sort = "name asc"
@@ -46,6 +46,17 @@ func (u *UserRepository) FindAll(pgn *pagination.Pagination, loggedInId string) 
 		Rows()
 
 	return rows, err
+}
+
+func (u *UserRepository) FindAll(pgn *pagination.Pagination) ([]usermodel.UserEntity, error) {
+	var users []usermodel.UserEntity
+	if pgn.Sort == "" {
+		pgn.Sort = "name asc"
+	}
+
+	err := u.DB.Scopes(pagination.Paginate(users, pgn, u.DB)).Find(&users).Error
+
+	return users, err
 }
 
 func (u *UserRepository) FindById(id string) (usermodel.UserEntity, error) {
