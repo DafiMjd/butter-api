@@ -10,10 +10,10 @@ import (
 )
 
 func NewDb() *gorm.DB {
-	port := os.Getenv("POSTGRES_PORT")
-	user := os.Getenv("POSTGRES_USER")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	schema := os.Getenv("POSTGRES_SCHEMA")
+	port := os.Getenv("PGPORT")
+	user := os.Getenv("PGUSER")
+	password := os.Getenv("PGPASSWORD")
+	schema := os.Getenv("PGSCHEMA")
 
 	dsn := "host=localhost user=" + user + " password=" + password + " dbname=" + schema + " port=" + port + " sslmode=disable TimeZone=Asia/Jakarta"
 	// dsn := user + ":" + password + "@tcp(localhost:" + port + ")/" + schema + "?charset=utf8mb4&parseTime=True&loc=Local"
