@@ -16,7 +16,7 @@ func NewDb() *gorm.DB {
 	schema := os.Getenv("POSTGRES_SCHEMA")
 	host := os.Getenv("POSTGRES_HOST")
 
-	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + schema + " port=" + port + " sslmode=disable TimeZone=Asia/Jakarta"
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + schema + " port=" + port + " sslmode=disable"
 	// dsn := user + ":" + password + "@tcp(localhost:" + port + ")/" + schema + "?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
