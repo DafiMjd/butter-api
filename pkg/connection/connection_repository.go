@@ -40,9 +40,9 @@ func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.P
 			pgn,
 			c.DB,
 		)).
-		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "a.followee_id", "a.follower_id").
+		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at", "b.followee_id", "b.follower_id").
 		Joins("INNER JOIN butter.connections a ON u.id = a.follower_id").
-		// Joins("LEFT JOIN butter.connections b ON u.id = b.followee_id AND b.follower_id = ?", userId).
+		Joins("LEFT JOIN butter.connections b ON u.id = b.followee_id").
 		Where("a.followee_id = ?", userId).
 		Rows()
 
@@ -51,13 +51,13 @@ func (c *ConnectionRepository) FindAllFollowers(userId string, pgn *pagination.P
 
 func (c *ConnectionRepository) FindAllFollowings(userId string, pgn *pagination.Pagination) (*sql.Rows, error) {
 	rows, err := c.DB.
-		Table("butter.users a").
+		Table("butter.users u").
 		Scopes(pagination.PaginateOnly(
 			pgn,
 			c.DB,
 		)).
 		Select("id", "username", "name", "email", "birthdate", "created_at", "updated_at").
-		Joins("inner join butter.connections b on a.id = b.followee_id").
+		Joins("inner join butter.connections b on u.id = b.followee_id").
 		Where("b.follower_id = ?", userId).
 		Rows()
 
@@ -76,4 +76,18 @@ func (c *ConnectionRepository) FindConnectionsIn(inQuery string) ([]connectionmo
 	err := c.DB.Raw("SELECT * FROM butter.connections WHERE (followee_id, follower_id) IN " + inQuery).Scan(&res).Error
 
 	return res, err
+}
+
+func (c *ConnectionRepository) CountFollowers(followee_id string) (int64, error) {
+	var totalDocs int64
+	err := c.DB.Model(&connectionmodel.ConnectionEntity{}).Where("followee_id = ?", followee_id).Count(&totalDocs).Error
+
+	return totalDocs, err
+}
+
+func (c *ConnectionRepository) CountFollowings(follower_id string) (int64, error) {
+	var totalDocs int64
+	err := c.DB.Model(&connectionmodel.ConnectionEntity{}).Where("follower_id = ?", follower_id).Count(&totalDocs).Error
+
+	return totalDocs, err
 }

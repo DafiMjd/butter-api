@@ -21,6 +21,8 @@ type UserEntity struct {
 	DeletedAt           gorm.DeletedAt
 	FollowingConnection connectionmodel.ConnectionEntity `gorm:"foreignKey:followee_id;references:id"`
 	IsFollowed          bool                             `gorm:"-"`
+	FollowersCount      int64                            `gorm:"-"`
+	FollowingsCount     int64                            `gorm:"-"`
 }
 
 func (a *UserEntity) TableName() string {
@@ -29,14 +31,16 @@ func (a *UserEntity) TableName() string {
 
 func ToUserResponse(entity UserEntity) UserResponse {
 	return UserResponse{
-		Id:         entity.ID.String(),
-		Username:   entity.Username,
-		Name:       entity.Name,
-		Email:      entity.Email,
-		Birthdate:  entity.Birthdate,
-		CreatedAt:  entity.CreatedAt,
-		UpdatedAt:  entity.UpdatedAt,
-		IsFollowed: entity.IsFollowed,
+		Id:              entity.ID.String(),
+		Username:        entity.Username,
+		Name:            entity.Name,
+		Email:           entity.Email,
+		Birthdate:       entity.Birthdate,
+		CreatedAt:       entity.CreatedAt,
+		UpdatedAt:       entity.UpdatedAt,
+		IsFollowed:      entity.IsFollowed,
+		FollowersCount:  entity.FollowersCount,
+		FollowingsCount: entity.FollowingsCount,
 	}
 }
 

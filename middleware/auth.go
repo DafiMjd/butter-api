@@ -39,7 +39,7 @@ func (a *AuthMiddleware) AuthenticateFiber(allowedGuest bool) fiber.Handler {
 			return c.Next()
 		}
 
-		return checkToken(a, c, tokenString)
+		return checkToken(a, c, tokenString, allowedGuest)
 	}
 }
 
@@ -57,7 +57,7 @@ func (a *AuthMiddleware) AuthenticateRefreshToken() fiber.Handler {
 			panic(exception.NewBadRequestError(err.Error()))
 		}
 
-		return checkToken(a, c, payload.RefreshToken)
+		return checkToken(a, c, payload.RefreshToken, false)
 	}
 }
 
@@ -65,10 +65,11 @@ func checkToken(
 	a *AuthMiddleware,
 	c *fiber.Ctx,
 	t string,
+	allowedGuest bool,
 ) error {
 	token, err := helper.ParseJwt(t)
 
-	if err != nil {
+	if err != nil && !allowedGuest {
 		return exception.NewBadRequestError(err.Error())
 	}
 

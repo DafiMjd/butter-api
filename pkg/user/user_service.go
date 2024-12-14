@@ -119,6 +119,13 @@ func (u *UserService) FindById(id string, loggedInId string) usermodel.UserRespo
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
+	followersCount, err := u.ConnectionRepository.CountFollowers(id)
+	helper.PanicIfError(err)
+	followingsCount, err := u.ConnectionRepository.CountFollowings(id)
+	helper.PanicIfError(err)
+
+	user.FollowersCount = followersCount
+	user.FollowingsCount = followingsCount
 
 	if loggedInId != "" && loggedInId != id {
 		_, err := u.ConnectionRepository.FindConnection(loggedInId, id)
