@@ -91,8 +91,15 @@ func (c *ConnectionService) Unfollow(request connectionmodel.FollowRequest) user
 	return usermodel.ToUserResponse(followee)
 }
 
-func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	rows, err := c.ConnectionRepository.FindAllFollowers(userId, pgn)
+func (c *ConnectionService) FindAllFollowers(
+	userId string,
+	loggedInUserId string,
+	pgn *pagination.Pagination,
+) []usermodel.UserResponse {
+	if loggedInUserId == "" {
+		loggedInUserId = helper.UUIDZero
+	}
+	rows, err := c.ConnectionRepository.FindAllFollowers(userId, loggedInUserId, pgn)
 	helper.PanicIfError(err)
 
 	defer rows.Close()
@@ -121,17 +128,23 @@ func (c *ConnectionService) FindAllFollowers(userId string, pgn *pagination.Pagi
 	return usermodel.ToUserResponses(users)
 }
 
-func (c *ConnectionService) FindAllFollowings(userId string, pgn *pagination.Pagination) []usermodel.UserResponse {
-	rows, err := c.ConnectionRepository.FindAllFollowings(userId, pgn)
+func (c *ConnectionService) FindAllFollowings(
+	userId string,
+	loggedInUserId string,
+	pgn *pagination.Pagination,
+) []usermodel.UserResponse {
+	if loggedInUserId == "" {
+		loggedInUserId = helper.UUIDZero
+	}
+	rows, err := c.ConnectionRepository.FindAllFollowings(userId, loggedInUserId, pgn)
 	helper.PanicIfError(err)
 
 	defer rows.Close()
 
 	var users []usermodel.UserEntity
 	for rows.Next() {
-		user := usermodel.UserEntity{
-			IsFollowed: true,
-		}
+		user := usermodel.UserEntity{}
+		conn := connectionmodel.ConnectionEntity{}
 		err := rows.Scan(
 			&user.ID,
 			&user.Username,
@@ -140,7 +153,10 @@ func (c *ConnectionService) FindAllFollowings(userId string, pgn *pagination.Pag
 			&user.Birthdate,
 			&user.CreatedAt,
 			&user.UpdatedAt,
+			&conn.FollowerId,
 		)
+
+		user.IsFollowed = loggedInUserId == userId || helper.IsUUIDValid(conn.FollowerId.String())
 		helper.PanicIfError(err)
 		users = append(users, user)
 	}

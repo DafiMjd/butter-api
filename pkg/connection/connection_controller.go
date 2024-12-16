@@ -80,7 +80,9 @@ func (cn *ConnectionController) FindAllFollowers(c *fiber.Ctx) error {
 		panic(exception.NewBadRequestError(err.Error()))
 	}
 
-	response := cn.ConnectionService.FindAllFollowers(userId, &pgn)
+	loggedInUserId, _ := c.Locals("user_id").(string)
+
+	response := cn.ConnectionService.FindAllFollowers(userId, loggedInUserId, &pgn)
 	pgn.Docs = response
 
 	webResponse := model.WebResponse{
@@ -100,7 +102,9 @@ func (cn *ConnectionController) FindAllFollowings(c *fiber.Ctx) error {
 		panic(exception.NewBadRequestError(err.Error()))
 	}
 
-	response := cn.ConnectionService.FindAllFollowings(userId, &pgn)
+	loggedInUserId, _ := c.Locals("user_id").(string)
+
+	response := cn.ConnectionService.FindAllFollowings(userId, loggedInUserId, &pgn)
 	pgn.Docs = response
 
 	webResponse := model.WebResponse{
