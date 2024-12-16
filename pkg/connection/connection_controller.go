@@ -73,6 +73,9 @@ func (cn *ConnectionController) Unfollow(c *fiber.Ctx) error {
 
 func (cn *ConnectionController) FindAllFollowers(c *fiber.Ctx) error {
 	userId := c.Query("userId")
+	if userId == "" {
+		panic(exception.NewBadRequestError("userId is required"))
+	}
 
 	pgn := pagination.Pagination{}
 	err := c.QueryParser(&pgn)
